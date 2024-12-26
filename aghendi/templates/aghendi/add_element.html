@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Aghendi - {{ agenda.name }} - {{ section.name }}</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/init_styles.css' %}">
+    </head>
+    <body>
+        <div class="container">
+            <header class="header">
+                <h1 class="site-title">AGHENDI</h1>
+                <h2 class="site-name">Add Element</h2>
+            </header>
+
+            <main class="main-content">
+                <section class="form-section">
+                    <form method="POST" class="element-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="subject">Subject:</label>
+                            <input type="text" id="subject" name="subject" placeholder="Enter element subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="details">Details:</label>
+                            <textarea id="details" name="details" rows="4" placeholder="Enter element details" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="emission">Emission:</label>
+                            <input type="date" id="emission" name="emission" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="deadline">Deadline:</label>
+                            <input type="date" id="deadline" name="deadline" required>
+                        </div>
+                        <button type="submit" class="btn-submit">Create</button>
+                    </form>
+
+                    <p class="cancel-link">
+                        <a href="{% url 'view_agenda' section.agenda.id %}">Return to Agenda</a>
+                    </p>
+                </section>
+
+                {% if messages %}
+                    <section class="messages-section">
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="message">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+            </main>
+
+            <footer class="footer">
+                <p>&copy; 2025 Aghendi. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </body>
+</html>

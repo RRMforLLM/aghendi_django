@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Aghendi - {{ agenda.name }} - Delete Agenda</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/init_styles.css' %}">
+    </head>
+    <body>
+        <div class="container">
+            <header class="header">
+                <h1 class="site-title">AGHENDI</h1>
+                <h2 class="site-name">Delete Agenda</h2>
+            </header>
+
+            <main class="main-content">
+                <section class="form-section">
+                    <form method="POST" class="create-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="question">Are you sure you want to delete this "{{ agenda.name }}" agenda? This action is irreversible.</label>
+                        </div>
+                        <button type="submit" class="btn-submit">Confirm</button>
+                    </form>
+
+                    <p class="cancel-link">
+                        <a href="{% url 'view_agenda' agenda.id %}">Return to Agenda</a>
+                    </p>
+                </section>
+
+                {% if messages %}
+                    <section class="messages-section">
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="message">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+            </main>
+
+            <footer class="footer">
+                <p>&copy; 2025 Aghendi. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </body>
+</html>
