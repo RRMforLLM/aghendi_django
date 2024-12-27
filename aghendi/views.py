@@ -84,6 +84,16 @@ def join_agenda(request):
         try:
             agenda = Agenda.objects.get(name=name)
             
+            # Check if the user is the creator
+            if agenda.creator == request.user:
+                messages.error(request, "You cannot join an agenda you created.")
+                return render(request, 'aghendi/join_agenda.html')
+            
+            # Check if user is already a member
+            if request.user in agenda.members.all():
+                messages.error(request, "You are already a member of this agenda.")
+                return render(request, 'aghendi/join_agenda.html')
+            
             if agenda.key == key:
                 agenda.members.add(request.user)
                 messages.success(request, "Successfully joined the agenda!")
