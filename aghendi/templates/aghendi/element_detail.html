@@ -43,13 +43,13 @@
             </form>
 
             <div class="status-indicators">
-                {% if element.urgent %}
+                {% if element.urgent.exists %}
                     <p>Users who marked as urgent: 
                         {{ element.urgent.all|join:", " }}
                     </p>
                 {% endif %}
 
-                {% if element.completed %}
+                {% if element.completed.exists %}
                     <p>Users who marked as completed: 
                         {{ element.completed.all|join:", " }}
                     </p>
