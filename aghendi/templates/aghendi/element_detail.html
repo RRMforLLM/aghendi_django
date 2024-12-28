@@ -62,6 +62,13 @@
 
         <div class="comments-section">
             <h2>Comments ({{ comments.count }})</h2>
+
+            <form method="POST" action="{% url 'element_comments' element.section.agenda.id element.section.id element.id %}" class="add-comment-form">
+                {% csrf_token %}
+                <textarea name="comment" rows="4" placeholder="Add a comment..." required></textarea>
+                <button type="submit" class="btn">Comment</button>
+            </form>
+            </div>
             
             {% for comment in comments %}
                 <div class="comment">
@@ -80,13 +87,6 @@
                 {% empty %}
                 <p>No comments yet.</p>
             {% endfor %}
-
-            <form method="POST" action="{% url 'element_comments' element.section.agenda.id element.section.id element.id %}" class="add-comment-form">
-                {% csrf_token %}
-                <textarea name="comment" rows="4" placeholder="Add a comment..." required></textarea>
-                <button type="submit" class="btn">Comment</button>
-            </form>
-            </div>
         
         <a href="{% url 'view_agenda' element.section.agenda.id %}" class="btn">Back to Agenda</a>
     </body>
