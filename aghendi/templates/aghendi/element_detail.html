@@ -105,5 +105,15 @@
                 });
             });
         </script>
+
+        {% if messages %}
+        <section class="messages-section">
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
     </body>
 </html>

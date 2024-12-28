@@ -166,6 +166,21 @@ textarea {
     background: linear-gradient(135deg, rgba(47, 61, 92, 0.9), rgba(255, 87, 99, 0.9));
 }
 
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+}
+
+.message {
+    background: #3a3d47;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
