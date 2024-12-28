@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Agenda, AgendaSection, AgendaElement, ElementComment
 from .forms import AgendaKeyForm
 
+from datetime import strptime
+
 def index(request):
     return render(request, 'aghendi/index.html')
 
@@ -317,27 +319,38 @@ def delete_section(request, agenda_id, section_id):
 def add_element(request, agenda_id, section_id):
     agenda = get_object_or_404(Agenda, id=agenda_id)
     section = get_object_or_404(AgendaSection, id=section_id, agenda=agenda)
-
+    
     if request.method == 'POST':
         subject = request.POST.get('subject')
         details = request.POST.get('details')
         emission = request.POST.get('emission')
         deadline = request.POST.get('deadline')
-
+        
         if subject and details and emission and deadline:
-            AgendaElement.objects.create(
-                section=section,
-                subject=subject,
-                details=details,
-                emission=emission,
-                deadline=deadline
-            )
-            messages.success(request, "Element added successfully.")
-            return redirect('view_agenda', agenda_id=agenda.id)
+            try:
+                emission_date = strptime(emission, '%Y-%m-%d')
+                deadline_date = strptime(deadline, '%Y-%m-%d')
+                
+                if emission_date > deadline_date:
+                    messages.error(request, "Emission date cannot be after the deadline.")
+                    return redirect('add_element', agenda_id=agenda.id, section_id=section.id)
+                
+                AgendaElement.objects.create(
+                    section=section,
+                    subject=subject,
+                    details=details,
+                    emission=emission,
+                    deadline=deadline
+                )
+                messages.success(request, "Element added successfully.")
+                return redirect('view_agenda', agenda_id=agenda.id)
+            except ValueError:
+                messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+                return redirect('add_element', agenda_id=agenda.id, section_id=section.id)
         else:
             messages.error(request, "All fields are required.")
             return redirect('add_element', agenda_id=agenda.id, section_id=section.id)
-
+    
     return render(request, 'aghendi/add_element.html', {'section': section, 'agenda': agenda})
 
 @login_required
