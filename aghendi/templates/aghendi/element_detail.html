@@ -73,7 +73,7 @@
                 <div class="comment">
                     <div class="comment-header">
                         <strong>{{ comment.user.username }}</strong>
-                        <small>{{ comment.created_at|date:"F d, Y H:i" }}</small>
+                        <small class="timestamp" data-time="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"F d, Y H:i" }}</small>
                     </div>
                     <p>{{ comment.text }}</p>
                     {% if is_creator or is_editor %}
@@ -89,5 +89,16 @@
         </div>
         
         <a href="{% url 'view_agenda' element.section.agenda.id %}" class="btn">Back to Agenda</a>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.timestamp').forEach(function(element) {
+                    const utcTime = element.getAttribute('data-time');
+                    const localTime = moment(utcTime).format('MMMM D, YYYY HH:mm');
+                    element.textContent = localTime;
+                });
+            });
+        </script>
     </body>
 </html>
