@@ -6,6 +6,30 @@
         <link rel="stylesheet" href="{% static 'css/element_styles.css' %}">
     </head>
     <body>
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const messages = document.querySelectorAll('.message');
+                messages.forEach((message, index) => {
+                    // Remove messages after animation
+                    setTimeout(() => {
+                        message.addEventListener('animationend', (e) => {
+                            if (e.animationName === 'fadeOut') {
+                                message.remove();
+                            }
+                        });
+                    }, 100);
+                });
+            });
+        </script>
+        
         <div class="element-header">
             <h1>{{ element.subject }}</h1>
             <p>
@@ -105,15 +129,5 @@
                 });
             });
         </script>
-
-        {% if messages %}
-        <section class="messages-section">
-            <ul class="messages">
-                {% for message in messages %}
-                    <li class="message">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        </section>
-        {% endif %}
     </body>
 </html>
