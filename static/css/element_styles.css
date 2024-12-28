@@ -40,7 +40,7 @@ body {
 .comment {
     background: #3a3d47;
     padding: 12px;
-    margin-bottom: 12px;
+    margin-top: 24px;
     border-radius: 10px;
     transition: transform 0.3s ease, background 0.3s ease;
 }
