@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Agenda, AgendaSection, AgendaElement, ElementComment
 from .forms import AgendaKeyForm
 
-from datetime import strptime
+from datetime import datetime
 
 def index(request):
     return render(request, 'aghendi/index.html')
@@ -328,8 +328,8 @@ def add_element(request, agenda_id, section_id):
         
         if subject and details and emission and deadline:
             try:
-                emission_date = strptime(emission, '%Y-%m-%d')
-                deadline_date = strptime(deadline, '%Y-%m-%d')
+                emission_date = datetime.strptime(emission, '%Y-%m-%d')
+                deadline_date = datetime.strptime(deadline, '%Y-%m-%d')
                 
                 if emission_date > deadline_date:
                     messages.error(request, "Emission date cannot be after the deadline.")
