@@ -13,7 +13,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    animation: fadeInDown 0.8s ease-in-out;
+    animation: bounceIn 1s ease-out;
     background: #292c30;
     border-radius: 14px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
@@ -238,6 +238,13 @@ body {
     }
 }
 
+/* Or add some bounce effect to make it more energetic */
+@keyframes bounceIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .calendar-container {
@@ -289,5 +296,6 @@ body {
 
     .calendar-day {
         height: 80px;
+        width: 20%;
     }
 }
