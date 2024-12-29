@@ -203,7 +203,8 @@ def calendar_view(request, agenda_id):
     # Organize elements by date
     for element in elements_query:
         if element.emission:
-            emission_dates[element.emission].append({
+            emission_date = element.emission.strftime('%Y-%m-%d')  # Convert to string
+            emission_dates[emission_date].append({
                 'id': element.id,
                 'subject': element.subject,
                 'section': element.section.name,
@@ -213,7 +214,8 @@ def calendar_view(request, agenda_id):
                 'completed': request.user in element.completed.all()
             })
         if element.deadline:
-            deadline_dates[element.deadline].append({
+            deadline_date = element.deadline.strftime('%Y-%m-%d')  # Convert to string
+            deadline_dates[deadline_date].append({
                 'id': element.id,
                 'subject': element.subject,
                 'section': element.section.name,
