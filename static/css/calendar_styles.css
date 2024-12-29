@@ -13,7 +13,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    animation: bounceIn 1s ease-out;
+    animation: fadeInDown 1s ease-out;
     background: #292c30;
     border-radius: 14px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
@@ -243,13 +243,6 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-/* Or add some bounce effect to make it more energetic */
-@keyframes bounceIn {
-    0% { transform: scale(0.5); opacity: 0; }
-    60% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
 }
 
 /* Responsive styles */
