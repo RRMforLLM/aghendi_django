@@ -59,7 +59,7 @@ body {
 
 .btn-nav:hover {
     background: linear-gradient(135deg, #3e5186, #2f3d5c);
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: 0 8px 20px rgba(255, 87, 99, 0.8);
 }
 
@@ -88,6 +88,7 @@ body {
 .section-filter select:focus {
     outline: none;
     border-color: #ff5763;
+    box-shadow: 0 0 5px rgba(255, 87, 99, 0.5);
 }
 
 /* Calendar table styles */
@@ -118,6 +119,12 @@ body {
 .calendar td:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.calendar td.today {
+    background-color: #ff5763;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(255, 87, 99, 0.6);
 }
 
 .calendar-day {
