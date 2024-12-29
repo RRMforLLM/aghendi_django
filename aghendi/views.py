@@ -3,10 +3,13 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+
 from .models import Agenda, AgendaSection, AgendaElement, ElementComment
 from .forms import AgendaKeyForm
 
-from datetime import datetime
+from datetime import datetime, date
+from calendar import monthcalendar
+from collections import defaultdict
 
 def index(request):
     return render(request, 'aghendi/index.html')
@@ -162,6 +165,93 @@ def view_agenda(request, agenda_id):
         'user_urgent_elements': user_urgent_elements,
         'user_completed_elements': user_completed_elements,
     })
+
+@login_required
+def calendar_view(request, agenda_id):
+    agenda = get_object_or_404(Agenda, id=agenda_id)
+    
+    # Check permissions
+    is_creator = request.user == agenda.creator
+    is_editor = request.user in agenda.editors.all()
+    is_member = request.user in agenda.members.all()
+    
+    if not (is_creator or is_editor or is_member):
+        messages.error(request, "You do not have permission to view this agenda's calendar.")
+        return redirect('index')
+    
+    # Get current year and month from query parameters or use current date
+    year = int(request.GET.get('year', datetime.now().year))
+    month = int(request.GET.get('month', datetime.now().month))
+    selected_section = request.GET.get('section', '')
+    
+    # Get calendar for current month
+    cal = monthcalendar(year, month)
+    
+    # Get all elements for this agenda
+    elements_query = AgendaElement.objects.filter(
+        section__agenda=agenda
+    ).select_related('section')
+    
+    # Apply section filter if specified
+    if selected_section:
+        elements_query = elements_query.filter(section__id=selected_section)
+    
+    # Create dictionaries for emission and deadline dates
+    emission_dates = defaultdict(list)
+    deadline_dates = defaultdict(list)
+    
+    # Organize elements by date
+    for element in elements_query:
+        if element.emission:
+            emission_dates[element.emission].append({
+                'id': element.id,
+                'subject': element.subject,
+                'section': element.section.name,
+                'section_id': element.section.id,
+                'type': 'emission',
+                'urgent': request.user in element.urgent.all(),
+                'completed': request.user in element.completed.all()
+            })
+        if element.deadline:
+            deadline_dates[element.deadline].append({
+                'id': element.id,
+                'subject': element.subject,
+                'section': element.section.name,
+                'section_id': element.section.id,
+                'type': 'deadline',
+                'urgent': request.user in element.urgent.all(),
+                'completed': request.user in element.completed.all()
+            })
+    
+    # Get all sections for the filter dropdown
+    sections = agenda.sections.all()
+    
+    # Calculate previous and next month links
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+    
+    context = {
+        'agenda': agenda,
+        'calendar': cal,
+        'year': year,
+        'month': month,
+        'month_name': date(year, month, 1).strftime('%B'),
+        'emission_dates': dict(emission_dates),
+        'deadline_dates': dict(deadline_dates),
+        'sections': sections,
+        'selected_section': selected_section,
+        'prev_month': prev_month,
+        'prev_year': prev_year,
+        'next_month': next_month,
+        'next_year': next_year,
+        'is_creator': is_creator,
+        'is_editor': is_editor,
+        'is_member': is_member
+    }
+    
+    return render(request, 'aghendi/calendar_view.html', context)
 
 @login_required
 def delete_agenda(request, agenda_id):

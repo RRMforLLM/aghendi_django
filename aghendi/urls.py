@@ -11,6 +11,7 @@ urlpatterns = [
     path("join_agenda/", views.join_agenda, name="join_agenda"),
     
     path('agenda/<int:agenda_id>/', views.view_agenda, name='view_agenda'),
+    path('agenda/<int:agenda_id>/calendar/', views.calendar_view, name='calendar_view'),
     path('agenda/<int:agenda_id>/delete/', views.delete_agenda, name='delete_agenda'),
     path('agenda/<int:agenda_id>/add_editor/', views.add_editor, name='add_editor'),
     path('agenda/<int:agenda_id>/remove_editor/<int:user_id>/', views.remove_editor, name='remove_editor'),
