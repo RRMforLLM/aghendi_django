@@ -89,12 +89,10 @@ def join_agenda(request):
         try:
             agenda = Agenda.objects.get(name=name)
             
-            # Check if the user is the creator
             if agenda.creator == request.user:
                 messages.error(request, "You cannot join an agenda you created.")
                 return render(request, 'aghendi/join_agenda.html')
             
-            # Check if user is already a member
             if request.user in agenda.members.all():
                 messages.error(request, "You are already a member of this agenda.")
                 return render(request, 'aghendi/join_agenda.html')
@@ -191,9 +189,6 @@ def calendar_view(request, agenda_id):
     if selected_section:
         elements_query = elements_query.filter(section__id=selected_section)
     
-    # Debug print
-    print(f"Found {elements_query.count()} elements")
-    
     emission_dates = defaultdict(list)
     deadline_dates = defaultdict(list)
     
@@ -222,18 +217,6 @@ def calendar_view(request, agenda_id):
                 'urgent': request.user in element.urgent.all(),
                 'completed': request.user in element.completed.all()
             })
-    
-    # Debug print the constructed dates in template format
-    for week in cal:
-        for day in week:
-            if day != 0:
-                current_date = f"{year:04d}-{month:02d}-{day:02d}"
-                if current_date in emission_dates or current_date in deadline_dates:
-                    print(f"Date {current_date} has events:")
-                    if current_date in emission_dates:
-                        print(f"  Emissions: {emission_dates[current_date]}")
-                    if current_date in deadline_dates:
-                        print(f"  Deadlines: {deadline_dates[current_date]}")
     
     sections = agenda.sections.all()
     
