@@ -123,6 +123,7 @@ body {
 .sections-header .btn-submit {
     font-size: 0.9rem;
     padding: 8px 15px;
+    margin-left: 20px;
 }
 
 .section-header {
