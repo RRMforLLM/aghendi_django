@@ -7,7 +7,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 20px;
     max-width: 1200px;
 }
 
@@ -87,7 +86,6 @@ body {
     text-decoration: none;
     display: block;
     margin: 3px;
-    text-align: center;
 }
 
 .btn:hover {
@@ -312,7 +310,7 @@ body {
     body {
         padding: 10px;
     }
-    
+
     .calendar-nav {
         flex-direction: column;
         gap: 10px;
