@@ -150,6 +150,10 @@ body {
     margin: 15px 0;
 }
 
+.elements-list .element-item .table {
+    align-content: center;
+}
+
 .element-item {
     background: #3a3d47;
     padding: 15px;
