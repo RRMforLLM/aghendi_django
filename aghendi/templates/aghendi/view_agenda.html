@@ -116,7 +116,12 @@
                         {% endif %}
 
                         <div class="sections-container">
-                            <h3>Active Sections</h3>
+                            <div class="sections-header">
+                                <h3>Active Sections</h3>
+                                <a href="{% url 'calendar_view' agenda.id %}">
+                                    <button class="btn-submit">Calendar</button>
+                                </a>
+                            </div>
                             {% if agenda.sections.exists %}
                                 {% for section_data in sections %}
                                     <div class="section-container">

@@ -109,6 +109,22 @@ body {
     transform: translateY(-2px);
 }
 
+.sections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sections-header h3 {
+    margin: 0;
+}
+
+.sections-header .btn-submit {
+    font-size: 0.9rem;
+    padding: 8px 15px;
+}
+
 .section-header {
     background: linear-gradient(135deg, #ff5763, #3e5186);
     padding: 15px 20px;
