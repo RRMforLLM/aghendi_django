@@ -1,10 +1,10 @@
+{% load calendar_tags %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Aghendi - {{ agenda.name }} - Calendar</title>
-        {% load calendar_tags %}
         {% load static %}
         <link rel="stylesheet" href="{% static 'css/calendar_styles.css' %}">
     </head>
@@ -83,24 +83,36 @@
                                 <td class="calendar-day {% if day == 0 %}empty{% endif %}">
                                     {% if day != 0 %}
                                         <div class="day-number">{{ day }}</div>
-                                        {% with current_date=year|stringformat:"04d"|add:"-"|add:month|stringformat:"02d"|add:"-"|add:day|stringformat:"02d" %}
+                                        <!-- Create date string manually -->
+                                        {% with day_padded=day|stringformat:"02d" %}
+                                        {% with month_padded=month|stringformat:"02d" %}
+                                        {% with current_date=year|stringformat:"d"|add:"-"|add:month_padded|add:"-"|add:day_padded %}
+                                            <!-- Debug output -->
+                                            <script>
+                                                console.log("Generated date:", "{{ current_date }}");
+                                            </script>
+                                            
                                             <div class="day-events">
-                                                {% for event in emission_dates|get_item:current_date %}
-                                                    <a href="{% url 'element_detail' agenda.id event.section_id event.id %}" 
-                                                    class="event emission {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
-                                                        📅 {{ event.subject }}
-                                                    </a>
-                                                {% endfor %}
-                                                {% for event in deadline_dates|get_item:current_date %}
-                                                    <a href="{% url 'element_detail' agenda.id event.section_id event.id %}"
-                                                    class="event deadline {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
-                                                        ⚠️ {{ event.subject }}
-                                                    </a>
-                                                {% endfor %}
+                                                {% with emission_events=emission_dates|get_item:current_date %}
+                                                    {% for event in emission_events %}
+                                                        <a href="{% url 'element_detail' agenda.id event.section_id event.id %}" 
+                                                           class="event emission {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
+                                                            📅 {{ event.subject }}
+                                                        </a>
+                                                    {% endfor %}
+                                                {% endwith %}
+                                                
+                                                {% with deadline_events=deadline_dates|get_item:current_date %}
+                                                    {% for event in deadline_events %}
+                                                        <a href="{% url 'element_detail' agenda.id event.section_id event.id %}"
+                                                           class="event deadline {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
+                                                            ⚠️ {{ event.subject }}
+                                                        </a>
+                                                    {% endfor %}
+                                                {% endwith %}
                                             </div>
-                                            <!-- Debug print -->
-                                            {{ current_date|json_script:"debug-date" }}
-                                            <script>console.log("Checking date:", document.getElementById('debug-date').textContent);</script>
+                                        {% endwith %}
+                                        {% endwith %}
                                         {% endwith %}
                                     {% endif %}
                                 </td>
