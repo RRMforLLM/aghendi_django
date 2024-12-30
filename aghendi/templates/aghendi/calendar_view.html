@@ -5,8 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Aghendi - {{ agenda.name }} - Calendar</title>
         {% load calendar_tags %}
-        <!--{% load static %}
-        <link rel="stylesheet" href="{% static 'css/calendar_styles.css' %}">-->
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/calendar_styles.css' %}">
     </head>
     <body>
         {% if messages %}
