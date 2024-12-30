@@ -98,6 +98,9 @@
                                                     </a>
                                                 {% endfor %}
                                             </div>
+                                            <!-- Debug print -->
+                                            {{ current_date|json_script:"debug-date" }}
+                                            <script>console.log("Checking date:", document.getElementById('debug-date').textContent);</script>
                                         {% endwith %}
                                     {% endif %}
                                 </td>

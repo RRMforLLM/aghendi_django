@@ -170,7 +170,6 @@ def view_agenda(request, agenda_id):
 def calendar_view(request, agenda_id):
     agenda = get_object_or_404(Agenda, id=agenda_id)
     
-    # Check permissions
     is_creator = request.user == agenda.creator
     is_editor = request.user in agenda.editors.all()
     is_member = request.user in agenda.members.all()
@@ -179,31 +178,29 @@ def calendar_view(request, agenda_id):
         messages.error(request, "You do not have permission to view this agenda's calendar.")
         return redirect('index')
     
-    # Get current year and month from query parameters or use current date
     year = int(request.GET.get('year', datetime.now().year))
     month = int(request.GET.get('month', datetime.now().month))
     selected_section = request.GET.get('section', '')
     
-    # Get calendar for current month
     cal = monthcalendar(year, month)
     
-    # Get all elements for this agenda
     elements_query = AgendaElement.objects.filter(
         section__agenda=agenda
     ).select_related('section')
     
-    # Apply section filter if specified
     if selected_section:
         elements_query = elements_query.filter(section__id=selected_section)
     
-    # Create dictionaries for emission and deadline dates
+    # Debug print
+    print(f"Found {elements_query.count()} elements")
+    
     emission_dates = defaultdict(list)
     deadline_dates = defaultdict(list)
     
-    # Organize elements by date
     for element in elements_query:
         if element.emission:
-            emission_date = element.emission.strftime('%Y-%m-%d')  # Convert to string
+            emission_date = element.emission.strftime('%Y-%m-%d')
+            print(f"Adding emission date: {emission_date} for element: {element.subject}")
             emission_dates[emission_date].append({
                 'id': element.id,
                 'subject': element.subject,
@@ -214,7 +211,8 @@ def calendar_view(request, agenda_id):
                 'completed': request.user in element.completed.all()
             })
         if element.deadline:
-            deadline_date = element.deadline.strftime('%Y-%m-%d')  # Convert to string
+            deadline_date = element.deadline.strftime('%Y-%m-%d')
+            print(f"Adding deadline date: {deadline_date} for element: {element.subject}")
             deadline_dates[deadline_date].append({
                 'id': element.id,
                 'subject': element.subject,
@@ -225,10 +223,20 @@ def calendar_view(request, agenda_id):
                 'completed': request.user in element.completed.all()
             })
     
-    # Get all sections for the filter dropdown
+    # Debug print the constructed dates in template format
+    for week in cal:
+        for day in week:
+            if day != 0:
+                current_date = f"{year:04d}-{month:02d}-{day:02d}"
+                if current_date in emission_dates or current_date in deadline_dates:
+                    print(f"Date {current_date} has events:")
+                    if current_date in emission_dates:
+                        print(f"  Emissions: {emission_dates[current_date]}")
+                    if current_date in deadline_dates:
+                        print(f"  Deadlines: {deadline_dates[current_date]}")
+    
     sections = agenda.sections.all()
     
-    # Calculate previous and next month links
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
     next_month = month + 1 if month < 12 else 1
