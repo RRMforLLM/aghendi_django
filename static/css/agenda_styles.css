@@ -105,10 +105,6 @@ body {
     transition: transform 0.3s ease;
 }
 
-.section-container:hover {
-    transform: translateY(-2px);
-}
-
 .sections-header {
     display: flex;
     justify-content: space-between;
