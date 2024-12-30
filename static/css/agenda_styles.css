@@ -155,8 +155,8 @@ body {
 }
 
 .elements-list .element-item table td {
-    text-align: center; /* Center text horizontally */
-    vertical-align: middle; /* Center text vertically */
+    text-align: center;
+    vertical-align: middle;
 }
 
 .element-item {

@@ -157,13 +157,15 @@
                                                                             <td>{{ element.emission }}</td>
                                                                             <td>{{ element.deadline }}</td>
                                                                         </tr>
+                                                                        <tr>
+                                                                            {% if request.user in element.urgent.all %}
+                                                                                <td><span class="urgent-indicator">🚨 Urgent</span></td>
+                                                                            {% endif %}
+                                                                            {% if element.comments.count > 0 %}
+                                                                                <td><span class="comment-count">💬 {{ element.comments.count }}</span></td>
+                                                                            {% endif %}
+                                                                        </tr>
                                                                     </table>
-                                                                    {% if element.comments.count > 0 %}
-                                                                        <span class="comment-count">💬 {{ element.comments.count }}</span>
-                                                                    {% endif %}
-                                                                    {% if request.user in element.urgent.all %}
-                                                                        <span class="urgent-indicator">🚨 Urgent</span>
-                                                                    {% endif %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
