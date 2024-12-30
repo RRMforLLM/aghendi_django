@@ -438,7 +438,7 @@ body {
         max-width: none;
     }
 }
-
+/*
 @media (max-width: 768px) {
     .container {
         padding: 10px;
@@ -481,4 +481,4 @@ body {
         width: 100%;
         margin-bottom: 4px;
     }
-}
+}*/
