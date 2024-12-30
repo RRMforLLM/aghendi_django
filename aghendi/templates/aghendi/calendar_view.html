@@ -36,7 +36,6 @@
             <div class="calendar-header">
                 <h2>{{ agenda.name }} - Calendar View</h2>
                 
-                <!-- Navigation -->
                 <div class="calendar-nav">
                     <a href="?year={{ prev_year }}&month={{ prev_month }}&section={{ selected_section }}" class="btn-nav">
                         &lt; Previous Month
@@ -47,7 +46,6 @@
                     </a>
                 </div>
                 
-                <!-- Section Filter -->
                 <div class="section-filter">
                     <form method="GET">
                         <input type="hidden" name="year" value="{{ year }}">
@@ -83,36 +81,30 @@
                                 <td class="calendar-day {% if day == 0 %}empty{% endif %}">
                                     {% if day != 0 %}
                                         <div class="day-number">{{ day }}</div>
-                                        <!-- Create date string manually -->
                                         {% with day_padded=day|stringformat:"02d" %}
-                                        {% with month_padded=month|stringformat:"02d" %}
-                                        {% with current_date=year|stringformat:"d"|add:"-"|add:month_padded|add:"-"|add:day_padded %}
-                                            <!-- Debug output -->
-                                            <script>
-                                                console.log("Generated date:", "{{ current_date }}");
-                                            </script>
-                                            
-                                            <div class="day-events">
-                                                {% with emission_events=emission_dates|get_item:current_date %}
-                                                    {% for event in emission_events %}
-                                                        <a href="{% url 'element_detail' agenda.id event.section_id event.id %}" 
-                                                           class="event emission {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
-                                                            📅 {{ event.subject }}
-                                                        </a>
-                                                    {% endfor %}
+                                            {% with month_padded=month|stringformat:"02d" %}
+                                                {% with current_date=year|stringformat:"d"|add:"-"|add:month_padded|add:"-"|add:day_padded %}
+                                                    <div class="day-events">
+                                                        {% with emission_events=emission_dates|get_item:current_date %}
+                                                            {% for event in emission_events %}
+                                                                <a href="{% url 'element_detail' agenda.id event.section_id event.id %}" 
+                                                                class="event emission {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
+                                                                    📅 {{ event.subject }}
+                                                                </a>
+                                                            {% endfor %}
+                                                        {% endwith %}
+                                                        
+                                                        {% with deadline_events=deadline_dates|get_item:current_date %}
+                                                            {% for event in deadline_events %}
+                                                                <a href="{% url 'element_detail' agenda.id event.section_id event.id %}"
+                                                                class="event deadline {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
+                                                                    ⚠️ {{ event.subject }}
+                                                                </a>
+                                                            {% endfor %}
+                                                        {% endwith %}
+                                                    </div>
                                                 {% endwith %}
-                                                
-                                                {% with deadline_events=deadline_dates|get_item:current_date %}
-                                                    {% for event in deadline_events %}
-                                                        <a href="{% url 'element_detail' agenda.id event.section_id event.id %}"
-                                                           class="event deadline {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
-                                                            ⚠️ {{ event.subject }}
-                                                        </a>
-                                                    {% endfor %}
-                                                {% endwith %}
-                                            </div>
-                                        {% endwith %}
-                                        {% endwith %}
+                                            {% endwith %}
                                         {% endwith %}
                                     {% endif %}
                                 </td>
