@@ -147,9 +147,17 @@
                                                         {% if request.user not in element.completed.all %}
                                                             <li class="element-item">
                                                                 <a href="{% url 'element_detail' agenda.id section_data.section.id element.id %}">
-                                                                    <strong>Subject:</strong> {{ element.subject }}<br>
-                                                                    <strong>Emission:</strong> {{ element.emission }}<br>
-                                                                    <strong>Deadline:</strong> {{ element.deadline }}<br>
+                                                                    <table>
+                                                                        <tr>
+                                                                            <td colspan="2">
+                                                                                <strong>{{ element.subject }}</strong>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>{{ element.emission }}</td>
+                                                                            <td>{{ element.deadline }}</td>
+                                                                        </tr>
+                                                                    </table>
                                                                     {% if element.comments.count > 0 %}
                                                                         <span class="comment-count">💬 {{ element.comments.count }}</span>
                                                                     {% endif %}
