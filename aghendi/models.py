@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 class Agenda(models.Model):
     name = models.CharField(max_length=100, unique=True)
     key = models.CharField(max_length=100)
+    key_visible = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_agendas')
     editors = models.ManyToManyField(User, related_name="edited_agendas", blank=True)
     members = models.ManyToManyField(User, related_name='joined_agendas', blank=True)

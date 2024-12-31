@@ -114,7 +114,6 @@ def join_agenda(request):
 @login_required
 def view_agenda(request, agenda_id):
     agenda = get_object_or_404(Agenda, id=agenda_id)
-
     is_creator = request.user == agenda.creator
     is_editor = request.user in agenda.editors.all()
     is_member = request.user in agenda.members.all()
@@ -123,11 +122,13 @@ def view_agenda(request, agenda_id):
         messages.error(request, "You do not have permission to view this agenda.")
         return redirect('index')
 
+    show_key = is_creator or (agenda.key_visible and (is_editor or is_member))
+
     if request.method == 'POST' and is_creator:
         form = AgendaKeyForm(request.POST, instance=agenda)
         if form.is_valid():
             form.save()
-            messages.success(request, "Agenda key updated successfully.")
+            messages.success(request, "Agenda settings updated successfully.")
             return redirect('view_agenda', agenda_id=agenda.id)
     else:
         form = AgendaKeyForm(instance=agenda)
@@ -153,16 +154,18 @@ def view_agenda(request, agenda_id):
             'comment_count': sum([element.comments.count() for element in elements])
         })
 
-    return render(request, 'aghendi/view_agenda.html', {
+    context = {
         'agenda': agenda,
         'sections': section_data,
         'is_creator': is_creator,
         'is_editor': is_editor,
         'is_member': is_member,
         'form': form,
+        'show_key': show_key,
         'user_urgent_elements': user_urgent_elements,
         'user_completed_elements': user_completed_elements,
-    })
+    }
+    return render(request, 'aghendi/view_agenda.html', context)
 
 @login_required
 def calendar_view(request, agenda_id):

@@ -244,10 +244,14 @@
                     <div class="corner-right">
                         <div class="agenda-credentials">
                             <h3>Agenda Key</h3>
-                            {% if agenda.key %}
-                                <p><strong>Current Key:</strong> {{ agenda.key }}</p>
+                            {% if show_key %}
+                                {% if agenda.key %}
+                                    <p><strong>Current Key:</strong> {{ agenda.key }}</p>
+                                {% else %}
+                                    <p>No key has been set for this agenda yet.</p>
+                                {% endif %}
                             {% else %}
-                                <p>No key has been set for this agenda yet.</p>
+                                <p>Key visibility is restricted by the creator.</p>
                             {% endif %}
                             
                             {% if is_creator %}
@@ -255,7 +259,7 @@
                                     <form method="POST" class="key-form">
                                         {% csrf_token %}
                                         {{ form.as_p }}
-                                        <button type="submit" class="btn-submit">Update Key</button>
+                                        <button type="submit" class="btn-submit">Update Settings</button>
                                     </form>
                                 </div>
                             {% endif %}
