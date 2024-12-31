@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Aghendi - {{ agenda.name }} - {{ section.name }} - {{ element.name }} - Edit Element</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/element_styles.css' %}">
+    </head>
+    <body>
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="element-form">
+            <h2>Edit Element</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" value="{{ element.subject }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="details">Details:</label>
+                    <textarea id="details" name="details" required>{{ element.details }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="emission">Emission Date:</label>
+                    <input type="date" id="emission" name="emission" value="{{ element.emission|date:'Y-m-d' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Deadline:</label>
+                    <input type="date" id="deadline" name="deadline" value="{{ element.deadline|date:'Y-m-d' }}" required>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn">Update Element</button>
+                    <a href="{% url 'element_detail' agenda.id section.id element.id %}" class="btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const messages = document.querySelectorAll('.message');
+                messages.forEach(message => {
+                    setTimeout(() => {
+                        message.addEventListener('animationend', (e) => {
+                            if (e.animationName === 'fadeOut') {
+                                message.remove();
+                            }
+                        });
+                    }, 100);
+                });
+            });
+        </script>
+    </body>
+</html>

@@ -85,7 +85,10 @@
             <h2>Details</h2>
             <p>{{ element.details }}</p>
             {% if is_creator or is_editor %}
-                <a href="{% url 'delete_element' agenda.id section.id element.id %}" class="btn btn-delete">Delete</a>
+                <div class="element-actions">
+                    <a href="{% url 'edit_element' agenda.id section.id element.id %}" class="btn">Edit</a>
+                    <a href="{% url 'delete_element' agenda.id section.id element.id %}" class="btn btn-delete">Delete</a>
+                </div>
             {% endif %}
         </div>
 

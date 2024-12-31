@@ -501,6 +501,49 @@ def flag_element(request, agenda_id, section_id, element_id):
     return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
 
 @login_required
+def edit_element(request, agenda_id, section_id, element_id):
+    element = get_object_or_404(AgendaElement, id=element_id)
+    agenda = element.section.agenda
+
+    if request.user != agenda.creator and request.user not in agenda.editors.all():
+        messages.error(request, "You do not have permission to edit this element.")
+        return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
+
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        details = request.POST.get('details')
+        emission = request.POST.get('emission')
+        deadline = request.POST.get('deadline')
+
+        if subject and details and emission and deadline:
+            try:
+                emission_date = datetime.strptime(emission, '%Y-%m-%d')
+                deadline_date = datetime.strptime(deadline, '%Y-%m-%d')
+
+                if emission_date > deadline_date:
+                    messages.error(request, "Emission date cannot be after the deadline.")
+                    return redirect('edit_element', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
+
+                element.subject = subject
+                element.details = details
+                element.emission = emission
+                element.deadline = deadline
+                element.save()
+
+                messages.success(request, "Element updated successfully.")
+                return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
+            except ValueError:
+                messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+        else:
+            messages.error(request, "All fields are required.")
+
+    return render(request, 'aghendi/edit_element.html', {
+        'element': element,
+        'agenda': agenda,
+        'section': element.section
+    })
+
+@login_required
 def delete_element(request, agenda_id, section_id, element_id):
     element = get_object_or_404(AgendaElement, 
         id=element_id, 

@@ -24,6 +24,7 @@ urlpatterns = [
     path('agenda/<int:agenda_id>/section/<int:section_id>/add_element/', views.add_element, name='add_element'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/', views.element_detail, name='element_detail'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/flag/', views.flag_element, name='flag_element'),
+    path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/edit/', views.edit_element, name='edit_element'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/delete/', views.delete_element, name='delete_element'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/comments/', views.element_comments, name='element_comments'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
