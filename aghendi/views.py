@@ -1,5 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from django.contrib.auth import authenticate, login as auth_login, logout
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -21,10 +27,40 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
+            if 'failed_login' in request.session:
+                del request.session['failed_login']
             return redirect('index')
         else:
+            request.session['failed_login'] = True
             messages.error(request, "Invalid username or password")
-    return render(request, 'aghendi/login.html')
+    
+    show_reset = request.session.get('failed_login', False)
+    return render(request, 'aghendi/login.html', {'show_reset': show_reset})
+
+def password_reset_request(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            reset_url = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            
+            send_mail(
+                'Password Reset Request',
+                f'Please click the following link to reset your password: {reset_url}',
+                'noreply@yourdomain.com',
+                [email],
+                fail_silently=False,
+            )
+            messages.success(request, "Password reset instructions have been sent to your email.")
+        except User.DoesNotExist:
+            messages.success(request, "If an account exists with this email, password reset instructions will be sent.")
+        
+    return render(request, 'aghendi/password_reset_request.html')
 
 def signup(request):
     if request.method == "POST":

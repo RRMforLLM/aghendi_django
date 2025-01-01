@@ -6,7 +6,7 @@ urlpatterns = [
     path("login/", views.login, name="login"),
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logout_view, name="logout"),
-
+    
     path("create_agenda/", views.create_agenda, name="create_agenda"),
     path("join_agenda/", views.join_agenda, name="join_agenda"),
     
@@ -28,4 +28,16 @@ urlpatterns = [
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/delete/', views.delete_element, name='delete_element'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/comments/', views.element_comments, name='element_comments'),
     path('agenda/<int:agenda_id>/section/<int:section_id>/element/<int:element_id>/comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+]
+
+from django.contrib.auth import views as auth_views
+
+urlpatterns += [
+    path('password_reset/', views.password_reset_request, name='password_reset_request'),
+    path('password_reset/confirm/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(template_name='aghendi/password_reset_confirm.html'),
+         name='password_reset_confirm'),
+    path('password_reset/complete/',
+         auth_views.PasswordResetCompleteView.as_view(template_name='aghendi/password_reset_complete.html'),
+         name='password_reset_complete'),
 ]
