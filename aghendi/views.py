@@ -436,9 +436,9 @@ def delete_section(request, agenda_id, section_id):
 
     return render(request, 'aghendi/delete_section.html', {'section': section, 'agenda': agenda})
 
-def send_element_notification_emails(agenda, element, request):
+def send_element_notification_emails(agenda, element, request, is_edit=False):
     """
-    Send email notifications to all agenda members about a new element.
+    Send email notifications to all agenda members about a new or edited element.
     Returns the number of emails sent.
     """
     # Get all unique email addresses (creator, editors, and members)
@@ -459,9 +459,10 @@ def send_element_notification_emails(agenda, element, request):
             recipient_emails.add(member.email)
     
     # Create the email message
-    subject = f"New Element Added to {agenda.name}: {element.subject}"
+    action = "edited" if is_edit else "added"
+    subject = f"Element {action} in {agenda.name}: {element.subject}"
     message = f"""
-A new element has been added to the agenda "{agenda.name}":
+An element has been {action} in the agenda "{agenda.name}":
 
 Subject: {element.subject}
 Section: {element.section.name}
@@ -541,6 +542,58 @@ def add_element(request, agenda_id, section_id):
     return render(request, 'aghendi/add_element.html', {'section': section, 'agenda': agenda})
 
 @login_required
+def edit_element(request, agenda_id, section_id, element_id):
+    element = get_object_or_404(AgendaElement, id=element_id)
+    agenda = element.section.agenda
+
+    if request.user != agenda.creator and request.user not in agenda.editors.all():
+        messages.error(request, "You do not have permission to edit this element.")
+        return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
+
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        details = request.POST.get('details')
+        emission = request.POST.get('emission')
+        deadline = request.POST.get('deadline')
+
+        if subject and details and emission and deadline:
+            try:
+                emission_date = datetime.strptime(emission, '%Y-%m-%d')
+                deadline_date = datetime.strptime(deadline, '%Y-%m-%d')
+
+                if emission_date > deadline_date:
+                    messages.error(request, "Emission date cannot be after the deadline.")
+                    return redirect('edit_element', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
+
+                # Save the element's changes
+                element.subject = subject
+                element.details = details
+                element.emission = emission
+                element.deadline = deadline
+                element.save()
+
+                # Send notification emails about the edit
+                emails_sent = send_element_notification_emails(agenda, element, request, is_edit=True)
+                
+                if emails_sent > 0:
+                    messages.success(request, f"Element updated successfully. Notification sent to {emails_sent} recipients.")
+                else:
+                    messages.success(request, "Element updated successfully.")
+                    messages.warning(request, "Could not send notification emails.")
+
+                return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
+            except ValueError:
+                messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+        else:
+            messages.error(request, "All fields are required.")
+
+    return render(request, 'aghendi/edit_element.html', {
+        'element': element,
+        'agenda': agenda,
+        'section': element.section
+    })
+
+@login_required
 def element_detail(request, agenda_id, section_id, element_id):
     element = get_object_or_404(AgendaElement, id=element_id)
     agenda = element.section.agenda
@@ -600,49 +653,6 @@ def flag_element(request, agenda_id, section_id, element_id):
                 messages.success(request, "Completed flag removed.")
     
     return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
-
-@login_required
-def edit_element(request, agenda_id, section_id, element_id):
-    element = get_object_or_404(AgendaElement, id=element_id)
-    agenda = element.section.agenda
-
-    if request.user != agenda.creator and request.user not in agenda.editors.all():
-        messages.error(request, "You do not have permission to edit this element.")
-        return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
-
-    if request.method == 'POST':
-        subject = request.POST.get('subject')
-        details = request.POST.get('details')
-        emission = request.POST.get('emission')
-        deadline = request.POST.get('deadline')
-
-        if subject and details and emission and deadline:
-            try:
-                emission_date = datetime.strptime(emission, '%Y-%m-%d')
-                deadline_date = datetime.strptime(deadline, '%Y-%m-%d')
-
-                if emission_date > deadline_date:
-                    messages.error(request, "Emission date cannot be after the deadline.")
-                    return redirect('edit_element', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
-
-                element.subject = subject
-                element.details = details
-                element.emission = emission
-                element.deadline = deadline
-                element.save()
-
-                messages.success(request, "Element updated successfully.")
-                return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
-            except ValueError:
-                messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
-        else:
-            messages.error(request, "All fields are required.")
-
-    return render(request, 'aghendi/edit_element.html', {
-        'element': element,
-        'agenda': agenda,
-        'section': element.section
-    })
 
 @login_required
 def delete_element(request, agenda_id, section_id, element_id):
