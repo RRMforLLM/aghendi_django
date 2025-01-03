@@ -708,7 +708,7 @@ A new comment has been added to an element in the agenda "{agenda.name}":
 
 Element: {element.subject}
 Section: {element.section.name}
-Commented by: {comment.user.username}
+Author: {comment.user.username}
 Comment: {comment.text}
 
 View the element and all comments at: {request.build_absolute_uri(
