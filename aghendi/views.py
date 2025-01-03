@@ -4,6 +4,7 @@ from django.core.mail import send_mail, send_mass_mail
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth import authenticate, login as auth_login, logout
+from django.core.cache import cache
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -19,22 +20,122 @@ from collections import defaultdict
 def index(request):
     return render(request, 'aghendi/index.html')
 
+def get_client_ip(request):
+    """Get the client's IP address"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 def login(request):
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
+        
+        # Get client IP for rate limiting
+        client_ip = get_client_ip(request)
+        
+        # Rate limiting keys
+        attempts_key = f"login_attempts_{client_ip}"
+        lockout_key = f"login_lockout_{client_ip}"
+        
+        # Check if user is currently locked out
+        if cache.get(lockout_key):
+            lockout_time = cache.ttl(lockout_key)
+            minutes_left = round(lockout_time / 60)
+            messages.error(
+                request,
+                f"Account is temporarily locked. Please try again in {minutes_left} minutes."
+            )
+            return render(request, 'aghendi/login.html', {'show_reset': True})
+        
+        # Get current number of failed attempts
+        failed_attempts = cache.get(attempts_key, 0)
+        
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
+            # Successful login
             auth_login(request, user)
+            
+            # Clear failed attempts
+            cache.delete(attempts_key)
+            cache.delete(lockout_key)
+            
             if 'failed_login' in request.session:
                 del request.session['failed_login']
+            
             return redirect('index')
         else:
+            # Failed login attempt
+            failed_attempts += 1
+            
+            # Set or update failed attempts count (expires in 24 hours)
+            cache.set(attempts_key, failed_attempts, timeout=24*60*60)
+            
+            # Define thresholds for rate limiting
+            if failed_attempts >= 10:
+                # Lock account for 1 hour after 10 failed attempts
+                cache.set(lockout_key, True, timeout=60*60)
+                messages.error(
+                    request,
+                    "Too many failed attempts. Account is locked for 1 hour."
+                )
+            elif failed_attempts >= 5:
+                # Warning after 5 failed attempts
+                messages.error(
+                    request,
+                    f"Invalid credentials. {10 - failed_attempts} attempts remaining before temporary lockout."
+                )
+            else:
+                messages.error(request, "Invalid username or password")
+            
             request.session['failed_login'] = True
-            messages.error(request, "Invalid username or password")
-    
+            
     show_reset = request.session.get('failed_login', False)
     return render(request, 'aghendi/login.html', {'show_reset': show_reset})
+
+def signup(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+        
+        # Rate limit signup attempts
+        client_ip = get_client_ip(request)
+        signup_attempts_key = f"signup_attempts_{client_ip}"
+        signup_lockout_key = f"signup_lockout_{client_ip}"
+        
+        # Check if IP is locked out from signups
+        if cache.get(signup_lockout_key):
+            messages.error(request, "Too many signup attempts. Please try again later.")
+            return render(request, 'aghendi/signup.html')
+        
+        # Track signup attempts
+        attempts = cache.get(signup_attempts_key, 0)
+        if attempts >= 5:  # Limit to 5 signup attempts per hour
+            cache.set(signup_lockout_key, True, timeout=60*60)  # 1 hour lockout
+            messages.error(request, "Too many signup attempts. Please try again in 1 hour.")
+            return render(request, 'aghendi/signup.html')
+        
+        cache.set(signup_attempts_key, attempts + 1, timeout=60*60)
+        
+        if password == confirm_password:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists")
+            elif User.objects.filter(email=email).exists():
+                messages.error(request, "Email already registered")
+            else:
+                User.objects.create_user(username=username, email=email, password=password)
+                messages.success(request, "Account created successfully! You can log in now.")
+                return redirect('login')
+        else:
+            messages.error(request, "Passwords do not match")
+            
+    return render(request, 'aghendi/signup.html')
 
 def password_reset_request(request):
     if request.method == "POST":
@@ -60,25 +161,6 @@ def password_reset_request(request):
             messages.success(request, "If an account exists with this email, password reset instructions will be sent.")
         
     return render(request, 'aghendi/password_reset_request.html')
-
-def signup(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-        if password == confirm_password:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "Username already exists")
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, "Email already registered")
-            else:
-                User.objects.create_user(username=username, email=email, password=password)
-                messages.success(request, "Account created successfully! You can log in now.")
-                return redirect('login')
-        else:
-            messages.error(request, "Passwords do not match")
-    return render(request, 'aghendi/signup.html')
 
 def logout_view(request):
     logout(request)
