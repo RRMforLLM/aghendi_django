@@ -9,17 +9,63 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
-from .models import Agenda, AgendaSection, AgendaElement, ElementComment
-from .forms import AgendaKeyForm
+from django.conf import settings
 
 from datetime import datetime, date
 from calendar import monthcalendar
 from collections import defaultdict
 
+from .models import Agenda, AgendaSection, AgendaElement, ElementComment
+from .forms import AgendaKeyForm
+
 def index(request):
     return render(request, 'aghendi/index.html')
 
+def send_login_notification(user):
+    """Send an email notification when a user logs in"""
+    subject = 'New Login to Your Account'
+    message = f"""
+    Hello {user.username},
+    
+    We detected a new login to your account on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.
+    
+    If this wasn't you, please contact support immediately.
+    
+    Best regards,
+    Your App Team
+    """
+    
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=True,
+    )
+
+def send_welcome_email(user):
+    """Send a welcome email to newly registered users"""
+    subject = 'Welcome to Our Platform!'
+    message = f"""
+    Hello {user.username},
+    
+    Thank you for creating an account with us! We're excited to have you on board.
+    
+    You can now log in and start using our platform.
+    
+    Best regards,
+    Your App Team
+    """
+    
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=True,
+    )
+
+# [Previous helper functions remain unchanged]
 def get_client_ip(request):
     """Get the client's IP address"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -37,11 +83,9 @@ def get_rate_limit_key(request, username):
     client_ip = get_client_ip(request)
     user_agent = request.META.get('HTTP_USER_AGENT', '')
     
-    # For username attempts, we track by username + IP
     if username:
         return f"login_attempts_user_{username}_{client_ip}"
     
-    # For general IP attempts, we use a higher threshold
     return f"login_attempts_ip_{client_ip}"
 
 def login(request):
@@ -49,14 +93,12 @@ def login(request):
         username = request.POST['username']
         password = request.POST['password']
         
-        # Generate keys for both username-specific and IP-wide attempts
         username_key = get_rate_limit_key(request, username)
         ip_key = get_rate_limit_key(request, None)
         
-        # Check username-specific lockout
         username_attempts = cache.get(username_key, 0)
-        if username_attempts >= 5:  # More strict limit for specific username attempts
-            lockout_duration = 15 * 60  # 15 minutes
+        if username_attempts >= 5:
+            lockout_duration = 15 * 60
             if not cache.get(f"lockout_{username_key}"):
                 cache.set(f"lockout_{username_key}", True, timeout=lockout_duration)
             
@@ -67,10 +109,9 @@ def login(request):
             )
             return render(request, 'aghendi/login.html', {'show_reset': True})
         
-        # Check IP-wide lockout (prevents bulk attempts across multiple usernames)
         ip_attempts = cache.get(ip_key, 0)
-        if ip_attempts >= 20:  # Higher threshold for IP-wide attempts
-            lockout_duration = 30 * 60  # 30 minutes
+        if ip_attempts >= 20:
+            lockout_duration = 30 * 60
             if not cache.get(f"lockout_{ip_key}"):
                 cache.set(f"lockout_{ip_key}", True, timeout=lockout_duration)
             
@@ -84,7 +125,6 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # Successful login - clear all rate limiting for this user and IP
             auth_login(request, user)
             cache.delete(username_key)
             cache.delete(ip_key)
@@ -94,13 +134,14 @@ def login(request):
             if 'failed_login' in request.session:
                 del request.session['failed_login']
             
+            # Send login notification email
+            send_login_notification(user)
+            
             return redirect('index')
         else:
-            # Failed login attempt - increment both counters
             cache.set(username_key, username_attempts + 1, timeout=24*60*60)
             cache.set(ip_key, ip_attempts + 1, timeout=24*60*60)
             
-            # Provide appropriate warning messages
             remaining_username_attempts = 5 - username_attempts - 1
             if remaining_username_attempts > 0:
                 messages.error(
@@ -122,13 +163,11 @@ def signup(request):
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
         
-        # Rate limit signup attempts by IP but with a higher threshold
         client_ip = get_client_ip(request)
         signup_key = f"signup_attempts_{client_ip}"
         
-        # Check if IP has exceeded signup attempts
         signup_attempts = cache.get(signup_key, 0)
-        if signup_attempts >= 10:  # Allow more signup attempts before blocking
+        if signup_attempts >= 10:
             messages.error(request, "Too many signup attempts. Please try again in 1 hour.")
             return render(request, 'aghendi/signup.html')
         
@@ -140,8 +179,12 @@ def signup(request):
             elif User.objects.filter(email=email).exists():
                 messages.error(request, "Email already registered")
             else:
-                User.objects.create_user(username=username, email=email, password=password)
+                user = User.objects.create_user(username=username, email=email, password=password)
                 messages.success(request, "Account created successfully! You can log in now.")
+                
+                # Send welcome email to new user
+                send_welcome_email(user)
+                
                 return redirect('login')
         else:
             messages.error(request, "Passwords do not match")
