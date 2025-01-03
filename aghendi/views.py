@@ -32,7 +32,7 @@ def send_login_notification(user):
     If this wasn't you, please contact support immediately.
     
     Best regards,
-    Your App Team
+    Aghendi Team
     """
     
     send_mail(
@@ -54,7 +54,7 @@ def send_welcome_email(user):
     You can now log in and start using our platform.
     
     Best regards,
-    Your App Team
+    Aghendi Team
     """
     
     send_mail(
@@ -65,7 +65,6 @@ def send_welcome_email(user):
         fail_silently=True,
     )
 
-# [Previous helper functions remain unchanged]
 def get_client_ip(request):
     """Get the client's IP address"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -134,7 +133,6 @@ def login(request):
             if 'failed_login' in request.session:
                 del request.session['failed_login']
             
-            # Send login notification email
             send_login_notification(user)
             
             return redirect('index')
@@ -182,7 +180,6 @@ def signup(request):
                 user = User.objects.create_user(username=username, email=email, password=password)
                 messages.success(request, "Account created successfully! You can log in now.")
                 
-                # Send welcome email to new user
                 send_welcome_email(user)
                 
                 return redirect('login')
@@ -206,7 +203,7 @@ def password_reset_request(request):
             send_mail(
                 'Password Reset Request',
                 f'Please click the following link to reset your password: {reset_url}',
-                'noreply@yourdomain.com',
+                settings.DEFAULT_FROM_EMAIL,
                 [email],
                 fail_silently=False,
             )
@@ -573,28 +570,19 @@ def delete_section(request, agenda_id, section_id):
     return render(request, 'aghendi/delete_section.html', {'section': section, 'agenda': agenda})
 
 def send_element_notification_emails(agenda, element, request, is_edit=False):
-    """
-    Send email notifications to all agenda members about a new or edited element.
-    Returns the number of emails sent.
-    """
-    # Get all unique email addresses (creator, editors, and members)
     recipient_emails = set()
     
-    # Add creator's email
     if agenda.creator.email:
         recipient_emails.add(agenda.creator.email)
     
-    # Add editors' emails
     for editor in agenda.editors.all():
         if editor.email:
             recipient_emails.add(editor.email)
     
-    # Add members' emails
     for member in agenda.members.all():
         if member.email:
             recipient_emails.add(member.email)
     
-    # Create the email message
     action = "edited" if is_edit else "added"
     subject = f"Element {action} in {agenda.name}: {element.subject}"
     message = f"""
@@ -615,13 +603,11 @@ View the element at: {request.build_absolute_uri(
 )}
 """
     
-    # Prepare mass email
     datatuple = (
-        (subject, message, 'noreply@yourdomain.com', [email])
+        (subject, message, settings.DEFAULT_FROM_EMAIL, [email])
         for email in recipient_emails
     )
     
-    # Send emails
     try:
         send_mass_mail(datatuple, fail_silently=False)
         return len(recipient_emails)
@@ -649,7 +635,6 @@ def add_element(request, agenda_id, section_id):
                     messages.error(request, "Emission date cannot be after the deadline.")
                     return redirect('add_element', agenda_id=agenda.id, section_id=section.id)
                 
-                # Create the new element
                 element = AgendaElement.objects.create(
                     section=section,
                     subject=subject,
@@ -658,7 +643,6 @@ def add_element(request, agenda_id, section_id):
                     deadline=deadline
                 )
                 
-                # Send notification emails
                 emails_sent = send_element_notification_emails(agenda, element, request)
                 
                 if emails_sent > 0:
@@ -701,14 +685,12 @@ def edit_element(request, agenda_id, section_id, element_id):
                     messages.error(request, "Emission date cannot be after the deadline.")
                     return redirect('edit_element', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
 
-                # Save the element's changes
                 element.subject = subject
                 element.details = details
                 element.emission = emission
                 element.deadline = deadline
                 element.save()
 
-                # Send notification emails about the edit
                 emails_sent = send_element_notification_emails(agenda, element, request, is_edit=True)
                 
                 if emails_sent > 0:
@@ -812,32 +794,22 @@ def delete_element(request, agenda_id, section_id, element_id):
     return render(request, 'aghendi/delete_element.html', {'element': element})
 
 def send_comment_notification_emails(agenda, element, comment, request):
-    """
-    Send email notifications to all agenda members about a new comment.
-    Returns the number of emails sent.
-    """
-    # Get all unique email addresses (creator, editors, and members)
     recipient_emails = set()
     
-    # Add creator's email
     if agenda.creator.email:
         recipient_emails.add(agenda.creator.email)
     
-    # Add editors' emails
     for editor in agenda.editors.all():
         if editor.email:
             recipient_emails.add(editor.email)
     
-    # Add members' emails
     for member in agenda.members.all():
         if member.email:
             recipient_emails.add(member.email)
     
-    # Remove the commenter's email from recipients
     if comment.user.email in recipient_emails:
         recipient_emails.remove(comment.user.email)
     
-    # Create the email message
     subject = f"New comment on element in {agenda.name}: {element.subject}"
     message = f"""
 A new comment has been added to an element in the agenda "{agenda.name}":
@@ -856,13 +828,11 @@ View the element and all comments at: {request.build_absolute_uri(
 )}
 """
     
-    # Prepare mass email
     datatuple = (
-        (subject, message, 'noreply@yourdomain.com', [email])
+        (subject, message, settings.DEFAULT_FROM_EMAIL, [email])
         for email in recipient_emails
     )
     
-    # Send emails
     try:
         send_mass_mail(datatuple, fail_silently=False)
         return len(recipient_emails)
@@ -888,14 +858,12 @@ def element_comments(request, agenda_id, section_id, element_id):
     if request.method == 'POST':
         comment_text = request.POST.get('comment')
         if comment_text and comment_text.strip():
-            # Create the comment
             comment = ElementComment.objects.create(
                 element=element,
                 user=request.user,
                 text=comment_text
             )
             
-            # Send notification emails
             emails_sent = send_comment_notification_emails(agenda, element, comment, request)
             
             if emails_sent > 0:
