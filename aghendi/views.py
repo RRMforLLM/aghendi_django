@@ -29,65 +29,83 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+def get_rate_limit_key(request, username):
+    """
+    Generate a rate limit key based on multiple factors to prevent blocking legitimate users
+    while maintaining security
+    """
+    client_ip = get_client_ip(request)
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+    
+    # For username attempts, we track by username + IP
+    if username:
+        return f"login_attempts_user_{username}_{client_ip}"
+    
+    # For general IP attempts, we use a higher threshold
+    return f"login_attempts_ip_{client_ip}"
+
 def login(request):
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
         
-        # Get client IP for rate limiting
-        client_ip = get_client_ip(request)
+        # Generate keys for both username-specific and IP-wide attempts
+        username_key = get_rate_limit_key(request, username)
+        ip_key = get_rate_limit_key(request, None)
         
-        # Rate limiting keys
-        attempts_key = f"login_attempts_{client_ip}"
-        lockout_key = f"login_lockout_{client_ip}"
-        
-        # Check if user is currently locked out
-        if cache.get(lockout_key):
-            lockout_time = cache.ttl(lockout_key)
-            minutes_left = round(lockout_time / 60)
+        # Check username-specific lockout
+        username_attempts = cache.get(username_key, 0)
+        if username_attempts >= 5:  # More strict limit for specific username attempts
+            lockout_duration = 15 * 60  # 15 minutes
+            if not cache.get(f"lockout_{username_key}"):
+                cache.set(f"lockout_{username_key}", True, timeout=lockout_duration)
+            
+            minutes_left = round(cache.ttl(f"lockout_{username_key}") / 60)
             messages.error(
                 request,
-                f"Account is temporarily locked. Please try again in {minutes_left} minutes."
+                f"Too many failed attempts for this username. Please try again in {minutes_left} minutes."
             )
             return render(request, 'aghendi/login.html', {'show_reset': True})
         
-        # Get current number of failed attempts
-        failed_attempts = cache.get(attempts_key, 0)
+        # Check IP-wide lockout (prevents bulk attempts across multiple usernames)
+        ip_attempts = cache.get(ip_key, 0)
+        if ip_attempts >= 20:  # Higher threshold for IP-wide attempts
+            lockout_duration = 30 * 60  # 30 minutes
+            if not cache.get(f"lockout_{ip_key}"):
+                cache.set(f"lockout_{ip_key}", True, timeout=lockout_duration)
+            
+            minutes_left = round(cache.ttl(f"lockout_{ip_key}") / 60)
+            messages.error(
+                request,
+                f"Too many login attempts from this location. Please try again in {minutes_left} minutes."
+            )
+            return render(request, 'aghendi/login.html', {'show_reset': True})
         
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # Successful login
+            # Successful login - clear all rate limiting for this user and IP
             auth_login(request, user)
-            
-            # Clear failed attempts
-            cache.delete(attempts_key)
-            cache.delete(lockout_key)
+            cache.delete(username_key)
+            cache.delete(ip_key)
+            cache.delete(f"lockout_{username_key}")
+            cache.delete(f"lockout_{ip_key}")
             
             if 'failed_login' in request.session:
                 del request.session['failed_login']
             
             return redirect('index')
         else:
-            # Failed login attempt
-            failed_attempts += 1
+            # Failed login attempt - increment both counters
+            cache.set(username_key, username_attempts + 1, timeout=24*60*60)
+            cache.set(ip_key, ip_attempts + 1, timeout=24*60*60)
             
-            # Set or update failed attempts count (expires in 24 hours)
-            cache.set(attempts_key, failed_attempts, timeout=24*60*60)
-            
-            # Define thresholds for rate limiting
-            if failed_attempts >= 10:
-                # Lock account for 1 hour after 10 failed attempts
-                cache.set(lockout_key, True, timeout=60*60)
+            # Provide appropriate warning messages
+            remaining_username_attempts = 5 - username_attempts - 1
+            if remaining_username_attempts > 0:
                 messages.error(
                     request,
-                    "Too many failed attempts. Account is locked for 1 hour."
-                )
-            elif failed_attempts >= 5:
-                # Warning after 5 failed attempts
-                messages.error(
-                    request,
-                    f"Invalid credentials. {10 - failed_attempts} attempts remaining before temporary lockout."
+                    f"Invalid credentials. {remaining_username_attempts} attempts remaining for this username."
                 )
             else:
                 messages.error(request, "Invalid username or password")
@@ -104,24 +122,17 @@ def signup(request):
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
         
-        # Rate limit signup attempts
+        # Rate limit signup attempts by IP but with a higher threshold
         client_ip = get_client_ip(request)
-        signup_attempts_key = f"signup_attempts_{client_ip}"
-        signup_lockout_key = f"signup_lockout_{client_ip}"
+        signup_key = f"signup_attempts_{client_ip}"
         
-        # Check if IP is locked out from signups
-        if cache.get(signup_lockout_key):
-            messages.error(request, "Too many signup attempts. Please try again later.")
-            return render(request, 'aghendi/signup.html')
-        
-        # Track signup attempts
-        attempts = cache.get(signup_attempts_key, 0)
-        if attempts >= 5:  # Limit to 5 signup attempts per hour
-            cache.set(signup_lockout_key, True, timeout=60*60)  # 1 hour lockout
+        # Check if IP has exceeded signup attempts
+        signup_attempts = cache.get(signup_key, 0)
+        if signup_attempts >= 10:  # Allow more signup attempts before blocking
             messages.error(request, "Too many signup attempts. Please try again in 1 hour.")
             return render(request, 'aghendi/signup.html')
         
-        cache.set(signup_attempts_key, attempts + 1, timeout=60*60)
+        cache.set(signup_key, signup_attempts + 1, timeout=60*60)
         
         if password == confirm_password:
             if User.objects.filter(username=username).exists():
