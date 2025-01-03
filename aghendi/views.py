@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.utils.crypto import get_random_string
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth import authenticate, login as auth_login, logout
@@ -437,6 +436,62 @@ def delete_section(request, agenda_id, section_id):
 
     return render(request, 'aghendi/delete_section.html', {'section': section, 'agenda': agenda})
 
+def send_element_notification_emails(agenda, element, request):
+    """
+    Send email notifications to all agenda members about a new element.
+    Returns the number of emails sent.
+    """
+    # Get all unique email addresses (creator, editors, and members)
+    recipient_emails = set()
+    
+    # Add creator's email
+    if agenda.creator.email:
+        recipient_emails.add(agenda.creator.email)
+    
+    # Add editors' emails
+    for editor in agenda.editors.all():
+        if editor.email:
+            recipient_emails.add(editor.email)
+    
+    # Add members' emails
+    for member in agenda.members.all():
+        if member.email:
+            recipient_emails.add(member.email)
+    
+    # Create the email message
+    subject = f"New Element Added to {agenda.name}: {element.subject}"
+    message = f"""
+A new element has been added to the agenda "{agenda.name}":
+
+Subject: {element.subject}
+Section: {element.section.name}
+Details: {element.details}
+Emission Date: {element.emission.strftime('%Y-%m-%d')}
+Deadline: {element.deadline.strftime('%Y-%m-%d')}
+
+View the element at: {request.build_absolute_uri(
+    reverse('element_detail', kwargs={
+        'agenda_id': agenda.id,
+        'section_id': element.section.id,
+        'element_id': element.id
+    })
+)}
+"""
+    
+    # Prepare mass email
+    datatuple = (
+        (subject, message, 'noreply@yourdomain.com', [email])
+        for email in recipient_emails
+    )
+    
+    # Send emails
+    try:
+        send_mass_mail(datatuple, fail_silently=False)
+        return len(recipient_emails)
+    except Exception as e:
+        print(f"Error sending notification emails: {e}")
+        return 0
+
 @login_required
 def add_element(request, agenda_id, section_id):
     agenda = get_object_or_404(Agenda, id=agenda_id)
@@ -457,14 +512,24 @@ def add_element(request, agenda_id, section_id):
                     messages.error(request, "Emission date cannot be after the deadline.")
                     return redirect('add_element', agenda_id=agenda.id, section_id=section.id)
                 
-                AgendaElement.objects.create(
+                # Create the new element
+                element = AgendaElement.objects.create(
                     section=section,
                     subject=subject,
                     details=details,
                     emission=emission,
                     deadline=deadline
                 )
-                messages.success(request, "Element added successfully.")
+                
+                # Send notification emails
+                emails_sent = send_element_notification_emails(agenda, element, request)
+                
+                if emails_sent > 0:
+                    messages.success(request, f"Element added successfully. Notification sent to {emails_sent} recipients.")
+                else:
+                    messages.success(request, "Element added successfully.")
+                    messages.warning(request, "Could not send notification emails.")
+                
                 return redirect('view_agenda', agenda_id=agenda.id)
             except ValueError:
                 messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
