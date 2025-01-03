@@ -466,8 +466,8 @@ A new element has been added to the agenda "{agenda.name}":
 Subject: {element.subject}
 Section: {element.section.name}
 Details: {element.details}
-Emission Date: {element.emission.strftime('%Y-%m-%d')}
-Deadline: {element.deadline.strftime('%Y-%m-%d')}
+Emission Date: {element.emission}
+Deadline: {element.deadline}
 
 View the element at: {request.build_absolute_uri(
     reverse('element_detail', kwargs={
