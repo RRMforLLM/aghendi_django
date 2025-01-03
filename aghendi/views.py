@@ -464,10 +464,10 @@ def send_element_notification_emails(agenda, element, request, is_edit=False):
     message = f"""
 An element has been {action} in the agenda "{agenda.name}":
 
-Subject: {element.subject}
 Section: {element.section.name}
+Subject: {element.subject}
 Details: {element.details}
-Emission Date: {element.emission}
+Emission: {element.emission}
 Deadline: {element.deadline}
 
 View the element at: {request.build_absolute_uri(
@@ -675,6 +675,65 @@ def delete_element(request, agenda_id, section_id, element_id):
 
     return render(request, 'aghendi/delete_element.html', {'element': element})
 
+def send_comment_notification_emails(agenda, element, comment, request):
+    """
+    Send email notifications to all agenda members about a new comment.
+    Returns the number of emails sent.
+    """
+    # Get all unique email addresses (creator, editors, and members)
+    recipient_emails = set()
+    
+    # Add creator's email
+    if agenda.creator.email:
+        recipient_emails.add(agenda.creator.email)
+    
+    # Add editors' emails
+    for editor in agenda.editors.all():
+        if editor.email:
+            recipient_emails.add(editor.email)
+    
+    # Add members' emails
+    for member in agenda.members.all():
+        if member.email:
+            recipient_emails.add(member.email)
+    
+    # Remove the commenter's email from recipients
+    if comment.user.email in recipient_emails:
+        recipient_emails.remove(comment.user.email)
+    
+    # Create the email message
+    subject = f"New comment on element in {agenda.name}: {element.subject}"
+    message = f"""
+A new comment has been added to an element in the agenda "{agenda.name}":
+
+Element: {element.subject}
+Section: {element.section.name}
+Commented by: {comment.user.username}
+Comment: {comment.text}
+
+View the element and all comments at: {request.build_absolute_uri(
+    reverse('element_detail', kwargs={
+        'agenda_id': agenda.id,
+        'section_id': element.section.id,
+        'element_id': element.id
+    })
+)}
+"""
+    
+    # Prepare mass email
+    datatuple = (
+        (subject, message, 'noreply@yourdomain.com', [email])
+        for email in recipient_emails
+    )
+    
+    # Send emails
+    try:
+        send_mass_mail(datatuple, fail_silently=False)
+        return len(recipient_emails)
+    except Exception as e:
+        print(f"Error sending comment notification emails: {e}")
+        return 0
+
 @login_required
 def element_comments(request, agenda_id, section_id, element_id):
     element = get_object_or_404(AgendaElement, id=element_id)
@@ -693,12 +752,21 @@ def element_comments(request, agenda_id, section_id, element_id):
     if request.method == 'POST':
         comment_text = request.POST.get('comment')
         if comment_text and comment_text.strip():
-            ElementComment.objects.create(
+            # Create the comment
+            comment = ElementComment.objects.create(
                 element=element,
                 user=request.user,
                 text=comment_text
             )
-            messages.success(request, "Comment added successfully.")
+            
+            # Send notification emails
+            emails_sent = send_comment_notification_emails(agenda, element, comment, request)
+            
+            if emails_sent > 0:
+                messages.success(request, f"Comment added successfully. Notification sent to {emails_sent} recipients.")
+            else:
+                messages.success(request, "Comment added successfully.")
+                messages.warning(request, "Could not send notification emails.")
         
         return redirect('element_detail', agenda_id=agenda_id, section_id=section_id, element_id=element_id)
     
