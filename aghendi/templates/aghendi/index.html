@@ -3,11 +3,20 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Aghendi - Home</title>
+
+        {% if not user.is_authenticated %}
+            <title>Aghendi - Unite. Plan. Achieve.</title>
+        {% else %}
+            <title>Aghendi - Home</title>
+        {% endif %}
+
         {% load static %}
-        <link rel="stylesheet" href="{% static 'css/index_styles.css' %}">
+        <link rel="stylesheet" href="{% static 'css/index.css' %}">
+        <link rel="icon" href="{% static 'logo.png' %}">
+        <script src="{% static 'js/theme.js' %}"></script>
     </head>
     <body>
+        <!-- NOTIFICATIONS -->
         {% if messages %}
             <div class="messages-container">
                 {% for message in messages %}
@@ -30,83 +39,101 @@
                 });
             });
         </script>
+        <!-- --- -->
         
-        <header class="header">
-            <h1 class="site-title">AGHENDI</h1>
-            {% if not user.is_authenticated %}
-                <div class="auth-links">
-                    <a href="{% url 'login' %}">
-                        <button class="btn-submit">Login</button>
-                    </a>
-                    <a href="{% url 'signup' %}">
-                        <button class="btn-submit">Signup</button>
-                    </a>
-                </div>
-            {% else %}
-                <div class="action-buttons">
-                    <a href="{% url 'logout' %}">
-                        <button class="btn-submit">Logout</button>
-                    </a>
-                </div>
-            {% endif %}
-        </header>
-
-        {% if user.is_authenticated %}
-            <div class="main-content">
-                <h2>So {{ user.username }}, what proceeds?</h2>
-                <div class="agenda-buttons">
-                    <a href="{% url 'create_agenda' %}">
-                        <button class="btn-submit">CREATE</button>
-                    </a>
-                    <a href="{% url 'join_agenda' %}">
-                        <button class="btn-submit">JOIN</button>
-                    </a>
-                </div>
+        <!-- NAVBAR -->
+        <div class="navbar">
+            <a href="{% url 'index' %}">
+                <label class="nav-title">Aghendi</label>
+            </a>
+        
+            <div class="navbar-right">
+                {% if not user.is_authenticated %}
+                    <div class="auth-links">
+                        <a href="{% url 'login' %}">
+                            <button class="btn">Login</button>
+                        </a>
+                        <a href="{% url 'signup' %}">
+                            <button class="btn">Signup</button>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="action-buttons">
+                        <a href="{% url 'logout' %}">
+                            <button class="btn">Logout</button>
+                        </a>
+                    </div>
+                {% endif %}
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
             </div>
-
-            {% if user.created_agendas.exists or user.joined_agendas.exists %}
-                <div class="main-content">
-                    <div class="agenda-display">
-                        <div class="agenda-categories">
-                            {% if user.created_agendas.exists %}
-                                <div class="agenda-category">
-                                    <h3 class="agenda-display-title">CREATED</h3>
-                                    <div class="agenda-boxes">
-                                        {% for agenda in user.created_agendas.all %}
-                                            <div class="agenda-box">
-                                                <a href="{% url 'view_agenda' agenda.id %}">
-                                                    <span><strong>{{ agenda.name }}</strong></span>
-                                                </a>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            {% if user.joined_agendas.exists %}
-                                <div class="agenda-category">
-                                    <h3 class="agenda-display-title">JOINED</h3>
-                                    <div class="agenda-boxes">
-                                        {% for agenda in user.joined_agendas.all %}
-                                            {% if agenda.creator != user %}
-                                                <div class="agenda-box">
-                                                    <a href="{% url 'view_agenda' agenda.id %}">
-                                                        <span><strong>{{ agenda.name }}</strong></span>
-                                                    </a>
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
+        </div>
+        <!-- --- -->
+        
+        <!-- MAIN -->
+        {% if not user.is_authenticated %}
+            <img src="{% static filler.png %}">
+        {% else %}
+            <div class="main">
+                <div class="auth-section">
+                    <label class="welcome">So {{ user.username }}, what's next?</label>
+                    <div class="agenda-buttons">
+                        <a href="{% url 'create_agenda' %}">
+                            <button class="btn">Create</button>
+                        </a>
+                        <a href="{% url 'join_agenda' %}">
+                            <button class="btn">Join</button>
+                        </a>
                     </div>
                 </div>
-            {% endif %}
-        {% endif %}
+                
+                {% if user.created_agendas.exists or user.joined_agendas.exists %}
+                    <div class="display-section">
+                        <div class="agendas-display">
+                            <div class="agenda-categories">
 
-        <footer class="footer">
-            <p>© 2025 Aghendi. All rights reserved.</p>
-        </footer>
+                                {% if user.created_agendas.exists %}
+                                    <div class="agenda-category">
+                                        <label class="agenda-display-title">Created</label>
+                                        <div class="agenda-thumbnails">
+                                            {% for agenda in user.created_agendas.all %}
+                                            <a href="{% url 'view_agenda' agenda.id %}">
+                                                <div class="agenda-thumbnail">
+                                                        <label>{{ agenda.name }}</label>
+                                                </div>
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if user.joined_agendas.exists %}
+                                    <div class="agenda-category">
+                                        <label class="agenda-display-title">Joined</label>
+                                        <div class="agenda-thumbnails">
+                                            {% for agenda in user.joined_agendas.all %}
+                                                {% if agenda.creator != user %}
+                                                    <a href="{% url 'view_agenda' agenda.id %}">
+                                                        <div class="agenda-thumbnail">
+                                                                <label>{{ agenda.name }}</label>
+                                                        </div>
+                                                    </a>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        <!-- --- -->
+        
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>&copy; 2025 Aghendi. All rights reserved.</p>
+        </div>
+        <!-- --- -->
     </body>
 </html>

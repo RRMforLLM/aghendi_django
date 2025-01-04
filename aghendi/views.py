@@ -22,7 +22,6 @@ def index(request):
     return render(request, 'aghendi/index.html')
 
 def send_login_notification(user):
-    """Send an email notification when a user logs in"""
     subject = 'New Login to Your Account'
     message = f"""
     Hello {user.username},
@@ -44,7 +43,6 @@ def send_login_notification(user):
     )
 
 def send_welcome_email(user):
-    """Send a welcome email to newly registered users"""
     subject = 'Welcome to Our Platform!'
     message = f"""
     Hello {user.username},
