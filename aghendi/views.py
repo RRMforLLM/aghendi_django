@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.core.mail import send_mail, send_mass_mail
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
-from django.contrib.auth import authenticate, login as auth_login, logout
+from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
 from django.core.cache import cache
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
@@ -210,6 +210,39 @@ def password_reset_request(request):
             messages.success(request, "If an account exists with this email, password reset instructions will be sent.")
         
     return render(request, 'aghendi/password_reset_request.html')
+
+def password_reset_confirm(request, uidb64, token):
+    try:
+        # Decode the user id
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = get_user_model().objects.get(pk=uid)
+        
+        # Check if token is valid
+        if default_token_generator.check_token(user, token):
+            if request.method == 'POST':
+                # Get passwords from the form
+                new_password1 = request.POST.get('new_password1')
+                new_password2 = request.POST.get('new_password2')
+                
+                # Verify passwords match
+                if new_password1 == new_password2:
+                    # Set the new password
+                    user.set_password(new_password1)
+                    user.save()
+                    messages.success(request, 'Your password has been successfully changed.')
+                    return redirect('login')
+                else:
+                    messages.error(request, 'Passwords do not match.')
+            
+            return render(request, 'aghendi/password_reset_confirm.html', {
+                'validlink': True
+            })
+    except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
+        user = None
+    
+    return render(request, 'aghendi/password_reset_confirm.html', {
+        'validlink': False
+    })
 
 def logout_view(request):
     logout(request)
