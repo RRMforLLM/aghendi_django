@@ -369,7 +369,6 @@ def view_agenda(request, agenda_id):
 @login_required
 def calendar_view(request, agenda_id):
     agenda = get_object_or_404(Agenda, id=agenda_id)
-    
     is_creator = request.user == agenda.creator
     is_editor = request.user in agenda.editors.all()
     is_member = request.user in agenda.members.all()
@@ -377,13 +376,14 @@ def calendar_view(request, agenda_id):
     if not (is_creator or is_editor or is_member):
         messages.error(request, "You do not have permission to view this agenda's calendar.")
         return redirect('index')
-    
-    year = int(request.GET.get('year', datetime.now().year))
-    month = int(request.GET.get('month', datetime.now().month))
+
+    # Get current date information
+    current_date = datetime.now()
+    year = int(request.GET.get('year', current_date.year))
+    month = int(request.GET.get('month', current_date.month))
     selected_section = request.GET.get('section', '')
     
     cal = monthcalendar(year, month)
-    
     elements_query = AgendaElement.objects.filter(
         section__agenda=agenda
     ).select_related('section')
@@ -421,7 +421,6 @@ def calendar_view(request, agenda_id):
             })
     
     sections = agenda.sections.all()
-    
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
     next_month = month + 1 if month < 12 else 1
@@ -443,7 +442,11 @@ def calendar_view(request, agenda_id):
         'next_year': next_year,
         'is_creator': is_creator,
         'is_editor': is_editor,
-        'is_member': is_member
+        'is_member': is_member,
+        # Add current date information
+        'current_day': current_date.day,
+        'current_month': current_date.month,
+        'current_year': current_date.year
     }
     
     return render(request, 'aghendi/calendar_view.html', context)

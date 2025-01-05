@@ -11,6 +11,17 @@
     --accent-hover: #16324e;
     --thumbnail-bg: #f8f9fa;
     --success-color: #00b894;
+
+    --opposite-background-primary: #1a1a1a;
+    --opposite-background-secondary: #2d2d2d;
+    --opposite-text-primary: #ffffff;
+    --opposite-text-secondary: #a0a0a0;
+    --opposite-border-color: #404040;
+    --opposite-shadow-color: rgba(0, 0, 0, 0.3);
+    --opposite-accent-color: #1d3557;
+    --opposite-accent-hover: #16324e;
+    --opposite-thumbnail-bg: #2d2d2d;
+    --opposite-success-color: #00b894;
 }
 
 [data-theme="dark"] {
@@ -25,6 +36,17 @@
     --accent-hover: #16324e;
     --thumbnail-bg: #2d2d2d;
     --success-color: #00b894;
+
+    --opposite-background-primary: #f8f9fa;
+    --opposite-background-secondary: #ffffff;
+    --opposite-text-primary: #2d3436;
+    --opposite-text-secondary: #636e72;
+    --opposite-border-color: #e9ecef;
+    --opposite-shadow-color: rgba(0, 0, 0, 0.1);
+    --opposite-accent-color: #1d3557;
+    --opposite-accent-hover: #16324e;
+    --opposite-thumbnail-bg: #f8f9fa;
+    --opposite-success-color: #00b894;
 }
 
 /* CSS Reset and Base Styles */
@@ -40,7 +62,6 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--background-primary);
-    color: var(--text-primary);
 }
 
 a {
@@ -540,6 +561,7 @@ textarea {
 .member-name {
     flex: 1;
     min-width: 150px;
+    color: var(--text-primary);
 }
 
 .member-role {
@@ -1133,7 +1155,7 @@ input[type="checkbox"] {
 
 .current-month {
     font-size: 1.5rem;
-    color: var(--primary-color);
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -1167,16 +1189,19 @@ input[type="checkbox"] {
     box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.calendar td.today {
-    background-color: var(--accent-color);
-    color: white;
-    box-shadow: 0 4px 10px var(--shadow-color);
-}
-
 /* Calendar Day Cell */
 .calendar-day {
     height: 120px;
     width: 14.28%;
+}
+
+.calendar td.today {
+    background-color: var(--opposite-background-primary);
+    box-shadow: 0 4px 12px var(--opposite-shadow-color);
+}
+
+.calendar td.today .day-number {
+    color: var(--opposite-text-primary);
 }
 
 .calendar-day.empty {
@@ -1186,7 +1211,7 @@ input[type="checkbox"] {
 .day-number {
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: var(--accent-color);
+    color: var(--text-primary);
 }
 
 /* Events Display */
@@ -1230,10 +1255,6 @@ input[type="checkbox"] {
     transform: translateY(-1px);
     background-color: var(--accent-color);
     color: white;
-}
-
-.element-item.deadline {
-    border-left: 3px solid var(--accent-color);
 }
 
 .element-item.urgent {

@@ -114,7 +114,7 @@
                             {% for week in calendar %}
                                 <tr>
                                     {% for day in week %}
-                                        <td class="calendar-day {% if day == 0 %}empty{% endif %}">
+                                        <td class="calendar-day {% if day == 0 %}empty{% endif %} {% if day == current_day and month == current_month and year == current_year %}today{% endif %}">
                                             {% if day != 0 %}
                                                 <div class="day-number">{{ day }}</div>
                                                 {% with day_padded=day|stringformat:"02d" %}
