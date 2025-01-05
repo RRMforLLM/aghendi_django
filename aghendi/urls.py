@@ -35,9 +35,10 @@ from django.contrib.auth import views as auth_views
 urlpatterns += [
     path('password_reset/', views.password_reset_request, name='password_reset_request'),
     path('password_reset/confirm/<uidb64>/<token>/', 
-         auth_views.PasswordResetConfirmView.as_view(template_name='aghendi/password_reset_confirm.html'),
-         name='password_reset_confirm',
-         success_url='/password_reset/complete/'),
+         auth_views.PasswordResetConfirmView.as_view(
+            template_name='aghendi/password_reset_confirm.html',
+            success_url='/password_reset/complete/'),
+         name='password_reset_confirm'),
     path('password_reset/complete/',
          auth_views.PasswordResetCompleteView.as_view(template_name='aghendi/password_reset_complete.html'),
          name='password_reset_complete'),
