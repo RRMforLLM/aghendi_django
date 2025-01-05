@@ -61,7 +61,6 @@ a {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 1.5rem;
-    text-align: center;
 }
 
 .agenda-display-title {
@@ -138,6 +137,7 @@ a {
     margin-bottom: 3rem;
 }
 
+.auth-section .welcome,
 .auth-section .location {
     text-align: center;
 }
