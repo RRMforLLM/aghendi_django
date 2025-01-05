@@ -428,10 +428,100 @@ textarea {
     box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.members-list {
+/* Shared scrollable list styles */
+.members-list, .urgent-items, .completed-items, .elements-list {
     list-style: none;
     padding: 0;
     margin: 1rem 0;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: var(--accent-color) var(--background-primary); /* Firefox */
+}
+
+/* Webkit scrollbar styling for all scrollable lists */
+.members-list::-webkit-scrollbar,
+.urgent-items::-webkit-scrollbar,
+.completed-items::-webkit-scrollbar,
+.elements-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.members-list::-webkit-scrollbar-track,
+.urgent-items::-webkit-scrollbar-track,
+.completed-items::-webkit-scrollbar-track,
+.elements-list::-webkit-scrollbar-track {
+    background: var(--background-primary);
+    border-radius: 4px;
+}
+
+.members-list::-webkit-scrollbar-thumb,
+.urgent-items::-webkit-scrollbar-thumb,
+.completed-items::-webkit-scrollbar-thumb,
+.elements-list::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+.members-list::-webkit-scrollbar-thumb:hover,
+.urgent-items::-webkit-scrollbar-thumb:hover,
+.completed-items::-webkit-scrollbar-thumb:hover,
+.elements-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
+}
+
+/* Members list specific */
+.members-list {
+    max-height: 300px; /* Height for ~5 members */
+    overflow-y: auto;
+}
+
+/* Urgent and Completed items lists */
+.urgent-items,
+.completed-items {
+    max-height: 500px; /* Height for ~2 items */
+    overflow-y: auto;
+    padding-right: 8px; /* Prevent content from touching scrollbar */
+}
+
+/* Section elements list */
+.elements-list {
+    max-height: 400px; /* Height for ~2 elements */
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Keep existing member item styles */
+.member-item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.member-item:last-child {
+    border-bottom: none;
+}
+
+/* Ensure member actions don't break layout */
+.member-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Urgent and completed elements styling */
+.urgent-element, 
+.completed-element {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background-color: var(--background-primary);
+}
+
+.urgent-element:last-child,
+.completed-element:last-child {
+    margin-bottom: 0.5rem;
 }
 
 .member-item {
@@ -692,9 +782,9 @@ textarea {
 }
 
 /* Section Actions */
-.section-actions {
-    margin-top: 1.5rem;
+.section-content .section-actions {
     padding-top: 1.5rem;
+    margin-top: 1.5rem;
     border-top: 1px solid var(--border-color);
 }
 
@@ -862,6 +952,50 @@ input[type="checkbox"] {
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 4px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Comments Container */
+.comments-container {
+    max-height: 300px; /* Height for 3 comments: padding + header + line of text + margins */
+    overflow-y: auto;
+    margin: 1rem 0;
+    padding-right: 0.5rem; /* Space for scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) var(--background-primary);
+}
+
+/* Webkit scrollbar styling */
+.comments-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.comments-container::-webkit-scrollbar-track {
+    background: var(--background-primary);
+    border-radius: 4px;
+}
+
+.comments-container::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+.comments-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
+}
+
+/* Comment Styles */
+.comment {
+    background-color: var(--background-primary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.comment:last-child {
+    margin-bottom: 0.5rem;
 }
 
 .comment {
