@@ -138,7 +138,13 @@
                             <div class="agenda-credentials">
                                 <label class="section-title">Agenda Credentials</label>
                                 {% if agenda.key and not is_creator%}
-                                    <p>{{ agenda.key }}</p>
+                                    <ul class="members-list">
+                                        <li class="member-item">
+                                            <div class="member-header">
+                                                <span class="member-name"><strong>Key:</strong> {{ agenda.key }}</span>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 {% endif %}
 
                                 {% if is_creator %}
