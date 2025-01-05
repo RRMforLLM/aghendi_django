@@ -1,291 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Aghendi - {{ agenda.name }} - Dashboard</title>
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'css/agenda_styles.css' %}">
-    </head>
-    <body>
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aghendi - {{ agenda.name }} - Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="icon" href="{% static 'logo.png' %}">
+    <script src="{% static 'js/theme.js' %}"></script>
+</head>
+<body>
+    <!-- NOTIFICATIONS -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const messages = document.querySelectorAll('.message');
-                messages.forEach((message, index) => {
-                    setTimeout(() => {
-                        message.addEventListener('animationend', (e) => {
-                            if (e.animationName === 'fadeOut') {
-                                message.remove();
-                            }
-                        });
-                    }, 100);
-                });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+                setTimeout(() => {
+                    message.addEventListener('animationend', (e) => {
+                        if (e.animationName === 'fadeOut') {
+                            message.remove();
+                        }
+                    });
+                }, 100);
             });
-        </script>
-        
-        <div class="container">
-            <header class="header">
-                <div class="header-main">
-                    <h1 class="site-title">AGHENDI</h1>
-                    <div class="action-buttons">
-                        <a href="{% url 'index' %}">
-                            <button class="btn-submit">Return</button>
-                        </a>
-                    </div>
+        });
+    </script>
+    <!-- --- -->
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <a href="{% url 'index' %}">
+            <label class="nav-title">Aghendi</label>
+        </a>
+        <div class="navbar-right">
+            {% if not user.is_authenticated %}
+                <div class="auth-links">
+                    <a href="{% url 'login' %}">
+                        <button class="btn">Login</button>
+                    </a>
+                    <a href="{% url 'signup' %}">
+                        <button class="btn">Signup</button>
+                    </a>
                 </div>
-                <h2 class="site-name">{{ agenda.name }}</h2>
-            </header>
+            {% else %}
+                <div class="action-buttons">
+                    <a href="{% url 'logout' %}">
+                        <button class="btn">Logout</button>
+                    </a>
+                </div>
+            {% endif %}
+            <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
+        </div>
+    </div>
+    <!-- --- -->
 
-            <main class="main">
-                <div class="upper">
-                    <div class="corner-left">
-                        <div class="agenda-details">
-                            <h3>Creator</h3>
-                            <p>{{ agenda.creator.username }}</p>
-                        </div>
+    <!-- MAIN -->
+    <div class="main">
+        <div class="auth-section">
+            <label class="location">{{ agenda.name }}</label>
+            <div class="agenda-details">
+                <p>Created by {{ agenda.creator.username }}</p>
+            </div>
+        </div>
 
+        <div class="display-section">
+            <div class="agenda-layout">
+                <!-- Left Column -->
+                <div class="left-column">
+                    {% if agenda.members.exists %}
                         <div class="members-section">
-                            <h3>Members</h3>
+                            <label class="section-title">Members</label>
                             <ul class="members-list">
                                 {% for member in agenda.members.all %}
                                     <li class="member-item">
-                                        <span class="member-name">
-                                            {{ member.username }}
-                                            {% if member == agenda.creator %}
-                                                <span class="member-role">(Creator)</span>
-                                            {% elif member in agenda.editors.all %}
-                                                <span class="member-role">(Editor)</span>
-                                            {% endif %}
-                                        </span>
+                                        <div class="member-header" onclick="toggleMemberActions({{ member.id }})">
+                                            <span class="member-name">
+                                                {{ member.username }}
+                                                {% if member == agenda.creator %}
+                                                    <span class="member-role">(Creator)</span>
+                                                {% elif member in agenda.editors.all %}
+                                                    <span class="member-role">(Editor)</span>
+                                                {% endif %}
+                                            </span>
+                                        </div>
                                         {% if is_creator %}
-                                            {% if member != agenda.creator %}
-                                                <form method="POST" action="{% url 'remove_member' agenda.id member.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn-submit btn-small">Remove</button>
-                                                </form>
-                                            {% endif %}
-                                            {% if member not in agenda.editors.all %}
-                                                <form method="POST" action="{% url 'add_editor' agenda.id %}">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="username" value="{{ member.username }}">
-                                                    <button type="submit" class="btn-submit btn-small">Make Editor</button>
-                                                </form>
-                                            {% endif %}
-                                            {% if member in agenda.editors.all %}
-                                                <a href="{% url 'remove_editor' agenda.id member.id %}">
-                                                    <button class="btn-submit btn-small">Remove Editor</button>
-                                                </a>
-                                            {% endif %}
+                                            <div id="member-actions-{{ member.id }}" class="member-actions" style="display: none;">
+                                                {% if member != agenda.creator %}
+                                                    <form method="POST" action="{% url 'remove_member' agenda.id member.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="small-btn">Remove</button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if member not in agenda.editors.all %}
+                                                    <form method="POST" action="{% url 'add_editor' agenda.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="username" value="{{ member.username }}">
+                                                        <button type="submit" class="small-btn">Make Editor</button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if member in agenda.editors.all %}
+                                                    <a href="{% url 'remove_editor' agenda.id member.id %}">
+                                                        <button class="small-btn">Remove Editor</button>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
                                         {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>
                         </div>
-                        
-                        <div class="agenda-actions">
-                            {% if is_creator %}
-                                <a href="{% url 'delete_agenda' agenda.id %}">
-                                    <button class="btn-submit btn-danger">Delete</button>
-                                </a>
-                            {% elif is_member and not is_creator %}
-                                <a href="{% url 'leave_agenda' agenda.id %}">
-                                    <button class="btn-submit btn-warning">Leave</button>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
+                    {% endif %}
 
-                    <div class="middle-right">
-                        {% if is_creator or is_editor %}
-                            <div class="create-section">
-                                <h3>Create Section</h3>
-                                <form method="POST" action="{% url 'create_section' agenda.id %}" class="create-section-form">
-                                    {% csrf_token %}
-                                    <input type="text" name="section_name" placeholder="Section Name" required>
-                                    <button type="submit" class="btn-submit">Create</button>
-                                </form>
-                            </div>
-                        {% endif %}
-
-                        <div class="sections-container">
-                            <div class="sections-header">
-                                <h3>Active Sections</h3>
-                                <a href="{% url 'calendar_view' agenda.id %}">
-                                    <button class="btn-submit">Calendar</button>
-                                </a>
-                            </div>
-                            {% if agenda.sections.exists %}
-                                {% for section_data in sections %}
-                                    <div class="section-container">
-                                        <div class="section-header" onclick="toggleSectionContent({{ section_data.section.id }})">
-                                            <label class="section-title">{{ section_data.section.name }}</label>
-                                            {% if section_data.comment_count > 0 %}
-                                                <span id="section-comment-count-{{ section_data.section.id }}" class="comment-count">
-                                                    💬 {{ section_data.comment_count }}
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                            
-                                        <div id="section-content-{{ section_data.section.id }}" class="section-content" style="display: none;">
-                                            {% if is_creator or is_editor %}
-                                                <a href="{% url 'add_element' agenda.id section_data.section.id %}">
-                                                    <button class="btn-submit">Add Element</button>
-                                                </a>
-                                            {% endif %}
-
-                                            {% if section_data.elements %}
-                                                <ul class="elements-list">
-                                                    {% for element in section_data.elements %}
-                                                        {% if request.user not in element.completed.all %}
-                                                            <li class="element-item">
-                                                                <a href="{% url 'element_detail' agenda.id section_data.section.id element.id %}">
-                                                                    <table>
-                                                                        <tr>
-                                                                            <td colspan="2">
-                                                                                <strong>{{ element.subject }}</strong>
-                                                                            </td>
-                                                                        </tr>
-                                                                        <tr class="element-dates">
-                                                                            <td>{{ element.emission }}</td>
-                                                                            <td>{{ element.deadline }}</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            {% if request.user in element.urgent.all %}
-                                                                                <td><span class="urgent-indicator">🚨 Urgent</span></td>
-                                                                            {% endif %}
-                                                                            {% if element.comments.count > 0 %}
-                                                                                <td><span class="comment-count">💬 {{ element.comments.count }}</span></td>
-                                                                            {% endif %}
-                                                                        </tr>
-                                                                    </table>
-                                                                </a>
-                                                            </li>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </ul>
-                                            {% else %}
-                                                <p class="no-elements">No elements in this section.</p>
-                                            {% endif %}
-
-                                            {% if is_creator or is_editor %}
-                                                <div class="section-actions">
-                                                    <a href="{% url 'delete_section' agenda.id section_data.section.id %}">
-                                                        <button class="btn-submit btn-danger">Delete</button>
-                                                    </a>                    
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                <p class="no-sections">No sections in this agenda.</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lower">
-                    <div class="middle-column">
-                        {% if user_urgent_elements %}
-                            <div class="urgent-section">
-                                <h3>🚨 Your Urgent Items</h3>
-                                <ul class="urgent-items">
-                                    {% for element in user_urgent_elements %}
-                                        <li class="urgent-element">
-                                            <a href="{% url 'element_detail' agenda.id element.section.id element.id %}">
-                                                <strong>{{ element.subject }}</strong><br>
-                                                <span class="element-meta">
-                                                    Section: {{ element.section.name }}<br>
-                                                    Emission: {{ element.emission }}<br>
-                                                    Deadline: {{ element.deadline }}
-                                                </span><br>
-                                                {% if element.comments.count > 0 %}
-                                                    <span class="comment-count">💬 {{ element.comments.count }}</span>
-                                                {% endif %}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                        
-                        {% if user_completed_elements %}
-                            <div class="completed-section">
-                                <h3>✅ Your Completed Items</h3>
-                                <ul class="completed-items">
-                                    {% for element in user_completed_elements %}
-                                        <li class="completed-element">
-                                            <a href="{% url 'element_detail' agenda.id element.section.id element.id %}">
-                                                <strong>{{ element.subject }}</strong><br>
-                                                <span class="element-meta">
-                                                    Section: {{ element.section.name }}<br>
-                                                    Emission: {{ element.emission }}<br>
-                                                    Deadline: {{ element.deadline }}
-                                                </span><br>
-                                                {% if element.comments.count > 0 %}
-                                                    <span class="comment-count">💬 {{ element.comments.count }}</span>
-                                                {% endif %}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                    </div>
+                    <script>
+                        function toggleMemberActions(memberId) {
+                            const actionsDiv = document.getElementById(`member-actions-${memberId}`);
+                            if (actionsDiv) {
+                                const allActionDivs = document.querySelectorAll('.member-actions');
+                                allActionDivs.forEach(div => {
+                                    if (div !== actionsDiv && div.style.display === 'flex') {
+                                        div.style.display = 'none';
+                                    }
+                                });
+                                actionsDiv.style.display = actionsDiv.style.display === 'none' ? 'flex' : 'none';
+                            }
+                        }
+                        </script>
                     
-                    <div class="corner-right">
+                    {% if show_key %}
                         <div class="agenda-credentials">
-                            <h3>Agenda Key</h3>
-                            {% if show_key %}
-                                {% if agenda.key %}
-                                    <p><strong>Current Key:</strong> {{ agenda.key }}</p>
-                                {% else %}
-                                    <p>No key has been set for this agenda yet.</p>
-                                {% endif %}
-                            {% else %}
-                                <p>Key visibility is restricted by the creator.</p>
+                            <label class="section-title">Agenda Credentials</label>
+                            {% if agenda.key and not is_creator%}
+                                <p>{{ agenda.key }}</p>
                             {% endif %}
-                            
+
                             {% if is_creator %}
                                 <div class="key-update">
                                     <form method="POST" class="key-form">
                                         {% csrf_token %}
                                         {{ form.as_p }}
-                                        <button type="submit" class="btn-submit">Update Settings</button>
+                                        <button type="submit" class="btn">Update Settings</button>
                                     </form>
                                 </div>
                             {% endif %}
                         </div>
-                    </div>
+                    {% endif %}
+
+                    {% if is_creator %}
+                        <div class="agenda-actions">
+                            <a href="{% url 'delete_agenda' agenda.id %}">
+                                <button class="btn danger">Delete Agenda</button>
+                            </a>
+                        </div>
+                    {% elif is_member and not is_creator %}
+                        <div class="agenda-actions">
+                            <a href="{% url 'leave_agenda' agenda.id %}">
+                                <button class="btn warning">Leave Agenda</button>
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
-            </main>
 
-            <footer class="footer">
-                <p>&copy; 2025 Aghendi. All Rights Reserved.</p>
-            </footer>
+                <!-- Middle Column -->
+                <div class="middle-column">
+                    {% if is_creator or is_editor %}
+                        <div class="create-section">
+                            <form method="POST" action="{% url 'create_section' agenda.id %}" class="create-form">
+                                {% csrf_token %}
+                                <input type="text" name="section_name" placeholder="Section Name" required>
+                                <button type="submit" class="btn">Create Section</button>
+                            </form>
+                        </div>
+                    {% endif %}
+
+                    <div class="sections-container">
+                        <div class="sections-header">
+                            <label class="section-title">Active Sections</label>
+                            <a href="{% url 'calendar_view' agenda.id %}">
+                                <button class="btn">Calendar</button>
+                            </a>
+                        </div>
+
+                        {% if agenda.sections.exists %}
+                            {% for section_data in sections %}
+                                <div class="section-container">
+                                    <div class="section-header" onclick="toggleSectionContent({{ section_data.section.id }})">
+                                        <label class="section-name">{{ section_data.section.name }}</label>
+                                        {% if section_data.comment_count > 0 %}
+                                            <span id="section-comment-count-{{ section_data.section.id }}" class="comment-count">
+                                                💬 {{ section_data.comment_count }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div id="section-content-{{ section_data.section.id }}" class="section-content" style="display: none;">
+                                        {% if section_data.elements %}
+                                            <ul class="elements-list">
+                                                {% for element in section_data.elements %}
+                                                    {% if request.user not in element.completed.all %}
+                                                        <li class="element-item">
+                                                            <a href="{% url 'element_detail' agenda.id section_data.section.id element.id %}">
+                                                                <div class="element-content">
+                                                                    <strong>{{ element.subject }}</strong>
+                                                                    <div class="element-dates">
+                                                                        <span>{{ element.emission }}</span>
+                                                                        <span>{{ element.deadline }}</span>
+                                                                    </div>
+                                                                    <div class="element-indicators">
+                                                                        {% if request.user in element.urgent.all %}
+                                                                            <span class="urgent-indicator">🚨 Urgent</span>
+                                                                        {% endif %}
+                                                                        {% if element.comments.count > 0 %}
+                                                                            <span class="comment-count">💬 {{ element.comments.count }}</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <p class="no-elements">No elements in this section.</p>
+                                        {% endif %}
+
+                                        {% if is_creator or is_editor %}
+                                            <div class="section-actions">
+                                                <a href="{% url 'add_element' agenda.id section_data.section.id %}">
+                                                    <button class="btn">Add Element</button>
+                                                </a>
+                                                <a href="{% url 'delete_section' agenda.id section_data.section.id %}">
+                                                    <button class="btn danger">Delete Section</button>
+                                                </a>                    
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-sections">No sections in this agenda.</p>
+                        {% endif %}
+                    </div>
+
+                    {% if user_urgent_elements %}
+                        {% if user_completed_elements %}
+                            <div class="completed-section">
+                                <label class="section-title">Your Completed Items</label>
+                                <ul class="completed-items">
+                                    {% for element in user_completed_elements %}
+                                        <li class="completed-element">
+                                            <a href="{% url 'element_detail' agenda.id element.section.id element.id %}">
+                                                <div class="element-content">
+                                                    <strong>{{ element.subject }}</strong>
+                                                    <div class="element-meta">
+                                                        <span>Section: {{ element.section.name }}</span>
+                                                        <span>Emission: {{ element.emission }}</span>
+                                                        <span>Deadline: {{ element.deadline }}</span>
+                                                    </div>
+                                                    {% if element.comments.count > 0 %}
+                                                        <span class="comment-count">💬 {{ element.comments.count }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-column">
+                    {% if user_urgent_elements %}
+                        <div class="urgent-section">
+                            <label class="section-title">Your Urgent Items</label>
+                            <ul class="urgent-items">
+                                {% for element in user_urgent_elements %}
+                                    <li class="urgent-element">
+                                        <a href="{% url 'element_detail' agenda.id element.section.id element.id %}">
+                                            <div class="element-content">
+                                                <strong>{{ element.subject }}</strong>
+                                                <div class="element-meta">
+                                                    <span>Section: {{ element.section.name }}</span>
+                                                    <span>Emission: {{ element.emission }}</span>
+                                                    <span>Deadline: {{ element.deadline }}</span>
+                                                </div>
+                                                {% if element.comments.count > 0 %}
+                                                    <span class="comment-count">💬 {{ element.comments.count }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                    {% if not user_urgent_elements %}
+                        {% if user_completed_elements %}
+                            <div class="completed-section">
+                                <label class="section-title">Your Completed Items</label>
+                                <ul class="completed-items">
+                                    {% for element in user_completed_elements %}
+                                        <li class="completed-element">
+                                            <a href="{% url 'element_detail' agenda.id element.section.id element.id %}">
+                                                <div class="element-content">
+                                                    <strong>{{ element.subject }}</strong>
+                                                    <div class="element-meta">
+                                                        <span>Section: {{ element.section.name }}</span>
+                                                        <span>Emission: {{ element.emission }}</span>
+                                                        <span>Deadline: {{ element.deadline }}</span>
+                                                    </div>
+                                                    {% if element.comments.count > 0 %}
+                                                        <span class="comment-count">💬 {{ element.comments.count }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
+    </div>
+    <!-- --- -->
 
-        <script>
-            function toggleSectionContent(sectionId) {
-                const sectionContent = document.getElementById(`section-content-${sectionId}`);
-                const commentCount = document.getElementById(`section-comment-count-${sectionId}`);
-        
-                if (sectionContent.style.display === "none") {
-                    sectionContent.style.display = "block";
-                    if (commentCount) commentCount.style.display = "none";
-                } else {
-                    sectionContent.style.display = "none";
-                    if (commentCount) commentCount.style.display = "block";
-                }
+    <!-- FOOTER -->
+    <div class="footer">
+        <p>&copy; 2025 Aghendi. All rights reserved.</p>
+    </div>
+    <!-- --- -->
+
+    <script>
+        function toggleSectionContent(sectionId) {
+            const sectionContent = document.getElementById(`section-content-${sectionId}`);
+            const commentCount = document.getElementById(`section-comment-count-${sectionId}`);
+    
+            if (sectionContent.style.display === "none") {
+                sectionContent.style.display = "block";
+                if (commentCount) commentCount.style.display = "none";
+            } else {
+                sectionContent.style.display = "none";
+                if (commentCount) commentCount.style.display = "block";
             }
-        </script>
-    </body>
+        }
+    </script>
+</body>
 </html>

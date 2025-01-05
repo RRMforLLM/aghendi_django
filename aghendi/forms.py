@@ -10,5 +10,5 @@ class AgendaKeyForm(forms.ModelForm):
             'key_visible': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
         labels = {
-            'key_visible': 'Make key visible to members'
+            'key_visible': 'Visibility'
         }

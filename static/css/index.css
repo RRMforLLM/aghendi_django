@@ -104,7 +104,7 @@ a {
 }
 
 /* Buttons */
-.btn {
+.btn, .small-btn {
     padding: 0.6rem 1.2rem;
     border: none;
     border-radius: 8px;
@@ -139,6 +139,7 @@ a {
 
 .auth-section .welcome,
 .auth-section .location {
+    display: block;
     text-align: center;
 }
 
@@ -331,19 +332,19 @@ a {
     margin-top: 1rem;
 }
 
-.forgot-password {
+.alternative-op {
     margin-top: 1rem;
     text-align: center;
 }
 
-.forgot-password a {
+.alternative-op a {
     color: #3498DB;
     font-size: 0.9rem;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.forgot-password a:hover {
+.alternative-op a:hover {
     color: var(--accent-hover);
     text-decoration: underline;
 }
@@ -380,4 +381,460 @@ a {
     color: #ff6b6b;
     font-size: 0.875rem;
     margin-top: 0.5rem;
+}
+
+/* Agenda Styles */
+/* Agenda Layout */
+.agenda-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr 250px;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .agenda-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .left-column, .right-column {
+        order: 2;
+    }
+    
+    .middle-column {
+        order: 1;
+    }
+}
+
+/* Left Column */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.members-section {
+    background-color: var(--background-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.members-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.member-item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.member-item:last-child {
+    border-bottom: none;
+}
+
+.member-name {
+    flex: 1;
+    min-width: 150px;
+}
+
+.member-role {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background-color: var(--background-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.small-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    height: 24px;
+    border-radius: 4px;
+    min-width: 60px;
+    white-space: nowrap;
+    margin: 0 2px;
+}
+
+/* Middle Column */
+.middle-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.create-section {
+    background-color: var(--background-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.create-form {
+    display: flex;
+    gap: 1rem;
+}
+
+.create-form input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+}
+
+.section-container {
+    background-color: var(--background-secondary);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.section-header {
+    padding: 1rem 1.5rem;
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-content {
+    padding: 1.5rem;
+}
+
+/* Element Styles */
+.elements-list {
+    list-style-type: none;
+}
+
+.element-content {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background-color: var(--background-primary);
+    transition: transform 0.2s ease;
+}
+
+.element-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.element-dates {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.element-indicators {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.urgent-indicator {
+    color: #dc3545;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.comment-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Right Column */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.agenda-credentials {
+    background-color: var(--background-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.key-form {
+    margin-top: 1rem;
+}
+
+/* Special Sections */
+.urgent-section, .completed-section {
+    background-color: var(--background-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.urgent-items, .completed-items {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.urgent-element, .completed-element {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background-color: var(--background-primary);
+}
+
+.urgent-element {
+    border-left: 4px solid #dc3545;
+}
+
+.completed-element {
+    border-left: 4px solid #28a745;
+}
+
+/* Utility Classes */
+.danger {
+    background-color: #dc3545;
+}
+
+.danger:hover {
+    background-color: #c82333;
+}
+
+.warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.warning:hover {
+    background-color: #e0a800;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.section-name {
+    color: white;
+}
+
+.agenda-details {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Add these new styles and updates to the existing CSS */
+
+/* Element Meta Information */
+.element-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Sections Header */
+.sections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+/* No Elements/Sections Messages */
+.no-elements, .no-sections {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+    background-color: var(--background-primary);
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+/* Section Actions */
+.section-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Key Update Form */
+.key-update {
+    margin-top: 1.5rem;
+}
+
+.key-form p {
+    margin-bottom: 1rem;
+}
+
+.key-form input[type="text"],
+.key-form input[type="checkbox"] {
+    margin: 0.5rem 0;
+}
+
+.key-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+/* Agenda Actions */
+.agenda-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Element Meta in Urgent/Completed Sections */
+.urgent-element .element-meta,
+.completed-element .element-meta {
+    padding: 0.5rem 0;
+}
+
+/* Create Section Form */
+.create-form {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+.create-form input {
+    padding: 0.75rem 1rem;
+}
+
+/* Members Section */
+.member-item {
+    padding: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.member-item:hover {
+    background-color: var(--background-primary);
+}
+
+/* Update existing styles */
+.section-container {
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    padding: 1.25rem 1.5rem;
+}
+
+.section-content {
+    padding: 2rem;
+}
+
+.element-content {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.element-dates {
+    padding: 0.75rem 0;
+}
+
+.element-indicators {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Form inputs global styles */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+/* Checkbox styles */
+input[type="checkbox"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+/* Button hover states */
+.small-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+/* Mobile Responsiveness Updates */
+@media (max-width: 768px) {
+    .section-content {
+        padding: 1.5rem;
+    }
+    
+    .element-content {
+        padding: 1rem;
+    }
+    
+    .member-item {
+        padding: 0.75rem;
+    }
+    
+    .create-form {
+        flex-direction: column;
+    }
+    
+    .create-form input {
+        width: 100%;
+    }
+    
+    .sections-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .sections-header .btn {
+        width: 100%;
+    }
+}
+
+/* Accessibility Improvements */
+.btn:focus-visible,
+.small-btn:focus-visible,
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.element-content:focus-within {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }

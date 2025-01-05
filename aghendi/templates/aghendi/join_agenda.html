@@ -5,18 +5,66 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Aghendi - Join Agenda</title>
         {% load static %}
-        <link rel="stylesheet" href="{% static 'css/init_styles.css' %}">
+        <link rel="stylesheet" href="{% static 'css/index.css' %}">
+        <link rel="icon" href="{% static 'logo.png' %}">
+        <script src="{% static 'js/theme.js' %}"></script>
     </head>
     <body>
-        <div class="container">
-            <header class="header">
-                <h1 class="site-title">AGHENDI</h1>
-                <h2 class="site-name">Join Agenda</h2>
-            </header>
+        <!-- NOTIFICATIONS -->
+        {% if messages %}
+            <div class="messages-container">
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
 
-            <main class="main-content">
-                <section class="form-section">
-                    <form method="POST" class="join-form">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+            setTimeout(() => {
+            message.addEventListener('animationend', (e) => {
+            if (e.animationName === 'fadeOut') {
+            message.remove();
+            }
+            });
+            }, 100);
+            });
+            });
+        </script>
+        <!-- --- -->
+        
+        <!-- NAVBAR -->
+        <div class="navbar">
+            <a href="{% url 'index' %}">
+                <label class="nav-title">Aghendi</label>
+            </a>
+            <div class="navbar-right">
+                {% if not user.is_authenticated %}
+                    <div class="auth-links">
+                        <a href="{% url 'signup' %}">
+                            <button class="btn">Signup</button>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="action-buttons">
+                        <a href="{% url 'logout' %}">
+                            <button class="btn">Logout</button>
+                        </a>
+                    </div>
+                {% endif %}
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
+            </div>
+        </div>
+        <!-- --- -->
+        
+        <!-- MAIN -->
+        <div class="main">
+            <div class="auth-section">
+                <label class="location">Join Agenda</label>
+                <div class="form-section">
+                    <form method="POST" class="login-form">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="agenda_name">Agenda Name:</label>
@@ -26,28 +74,20 @@
                             <label for="agenda_key">Agenda Key:</label>
                             <input type="password" id="agenda_key" name="agenda_key" placeholder="Enter agenda key" required>
                         </div>
-                        <button type="submit" class="btn-submit">Join</button>
+                        <button type="submit" class="btn">Join</button>
                     </form>
-
-                    <p class="cancel-link">
+                    <div class="alternative-op">
                         <a href="{% url 'index' %}">Return to Dashboard</a>
-                    </p>
-                </section>
-
-                {% if messages %}
-                    <section class="messages-section">
-                        <ul class="messages">
-                            {% for message in messages %}
-                                <li class="message">{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    </section>
-                {% endif %}
-            </main>
-
-            <footer class="footer">
-                <p>&copy; 2025 Aghendi. All Rights Reserved.</p>
-            </footer>
+                    </div>
+                </div>
+            </div>
         </div>
+        <!-- --- -->
+        
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>&copy; 2025 Aghendi. All rights reserved.</p>
+        </div>
+        <!-- --- -->
     </body>
 </html>
