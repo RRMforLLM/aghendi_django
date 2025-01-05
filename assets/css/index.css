@@ -137,6 +137,7 @@ a {
     margin-bottom: 3rem;
 }
 
+.auth-section .welcome,
 .auth-section .location {
     text-align: center;
 }
