@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Aghendi - {{ agenda.name }} - {{ section.name }} - {{ element.subject }}</title>
         {% load static %}
-        <link rel="stylesheet" href="{% static 'css/element_styles.css' %}">
+        <link rel="stylesheet" href="{% static 'css/index.css' %}">
+        <link rel="icon" href="{% static 'logo.png' %}">
+        <script src="{% static 'js/theme.js' %}"></script>
     </head>
     <body>
+        <!-- NOTIFICATIONS -->
         {% if messages %}
             <div class="messages-container">
                 {% for message in messages %}
@@ -18,7 +23,6 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const messages = document.querySelectorAll('.message');
                 messages.forEach((message, index) => {
-                    // Remove messages after animation
                     setTimeout(() => {
                         message.addEventListener('animationend', (e) => {
                             if (e.animationName === 'fadeOut') {
@@ -29,98 +33,177 @@
                 });
             });
         </script>
-        
-        <div class="element-header">
-            <h1>{{ element.subject }}</h1>
-            <p>
-                <strong>Section:</strong> {{ element.section.name }}<br>
-                <strong>Emission:</strong> {{ element.emission }}<br>
-                <strong>Deadline:</strong> {{ element.deadline }}
-            </p>
-        </div>
+        <!-- --- -->
 
-        <div class="element-flags">
-            <h3>Element Status</h3>
-            
-            <form method="POST" action="{% url 'flag_element' agenda.id section.id element.id %}" class="flag-form" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="flag_type" value="urgent">
-                {% if request.user in element.urgent.all %}
-                    <input type="hidden" name="action" value="remove">
-                    <button type="submit" class="btn btn-warning active">⚠️ Unmark Urgent</button>
+        <!-- NAVBAR -->
+        <div class="navbar">
+            <a href="{% url 'index' %}">
+                <label class="nav-title">Aghendi</label>
+            </a>
+            <div class="navbar-right">
+                {% if not user.is_authenticated %}
+                    <div class="auth-links">
+                        <a href="{% url 'login' %}">
+                            <button class="btn">Login</button>
+                        </a>
+                        <a href="{% url 'signup' %}">
+                            <button class="btn">Signup</button>
+                        </a>
+                    </div>
                 {% else %}
-                    <input type="hidden" name="action" value="add">
-                    <button type="submit" class="btn btn-warning">⚠️ Mark as Urgent</button>
+                    <div class="action-buttons">
+                        <a href="{% url 'logout' %}">
+                            <button class="btn">Logout</button>
+                        </a>
+                    </div>
                 {% endif %}
-            </form>
-
-            <form method="POST" action="{% url 'flag_element' agenda.id section.id element.id %}" class="flag-form" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="flag_type" value="completed">
-                {% if request.user in element.completed.all %}
-                    <input type="hidden" name="action" value="remove">
-                    <button type="submit" class="btn btn-success active">✓ Unmark Completed</button>
-                {% else %}
-                    <input type="hidden" name="action" value="add">
-                    <button type="submit" class="btn btn-success">✓ Mark as Completed</button>
-                {% endif %}
-            </form>
-
-            <div class="status-indicators">
-                {% if element.urgent.exists %}
-                    <p>Users who marked as urgent: 
-                        {{ element.urgent.all|join:", " }}
-                    </p>
-                {% endif %}
-
-                {% if element.completed.exists %}
-                    <p>Users who marked as completed: 
-                        {{ element.completed.all|join:", " }}
-                    </p>
-                {% endif %}
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
             </div>
         </div>
+        <!-- --- -->
 
-        <div class="element-details">
-            <h2>Details</h2>
-            <p>{{ element.details }}</p>
-            {% if is_creator or is_editor %}
-                <div class="element-actions">
-                    <a href="{% url 'edit_element' agenda.id section.id element.id %}" class="btn">Edit</a>
-                    <a href="{% url 'delete_element' agenda.id section.id element.id %}" class="btn btn-delete">Delete</a>
-                </div>
-            {% endif %}
-        </div>
+        <!-- MAIN -->
+        <div class="main">
+            <div class="auth-section">
+                <label class="location">{{ element.subject }}</label>
+            </div>
 
-        <div class="comments-section">
-            <h2>Comments ({{ comments.count }})</h2>
+            <div class="display-section">
+                <div class="agenda-layout">
+                    <!-- Left Column -->
+                    <div class="left-column">
+                        <div class="members-section">
+                            <label class="section-title">Info</label>
+                            <ul class="members-list">
+                                <li class="member-item">
+                                    <div class="member-header">
+                                        <span class="member-name">Section: {{ element.section.name }}</span>
+                                    </div>
+                                </li>
+                                <li class="member-item">
+                                    <div class="member-header">
+                                        <span class="member-name">Emission: {{ element.emission }}</span>
+                                    </div>
+                                </li>
+                                <li class="member-item">
+                                    <div class="member-header">
+                                        <span class="member-name">Deadline: {{ element.deadline }}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                            {% if is_creator or is_editor %}
+                                <div class="agenda-actions">
+                                    <a href="{% url 'edit_element' agenda.id section.id element.id %}">
+                                        <button type="submit" class="btn">Edit</button>
+                                    </a>
+                                    <a href="{% url 'delete_element' agenda.id section.id element.id %}">
+                                        <button type="submit" class="btn danger">Delete</button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
 
-            <form method="POST" action="{% url 'element_comments' element.section.agenda.id element.section.id element.id %}" class="add-comment-form">
-                {% csrf_token %}
-                <textarea name="comment" rows="4" placeholder="Add a comment..." required></textarea>
-                <button type="submit" class="btn">Comment</button>
-            </form>
-            
-            {% for comment in comments %}
-                <div class="comment">
-                    <div class="comment-header">
-                        <strong>{{ comment.user.username }}</strong>
-                        <small class="timestamp" data-time="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"F d, Y H:i" }}</small>
+                        <div class="agenda-actions">
+                            <a href="{% url 'view_agenda' element.section.agenda.id %}">
+                                <button type="submit" class="btn">Back to Agenda</button>
+                            </a>
+                        </div>
                     </div>
-                    <p>{{ comment.text }}</p>
-                    {% if is_creator or is_editor %}
-                        <form method="POST" action="{% url 'delete_comment' agenda.id section.id element.id comment.id %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-submit btn-small" onclick="return confirm('Are you sure you want to delete this comment?')" style="float: right;">Delete</button>
-                        </form>
-                    {% endif %}
+
+                    <!-- Middle Column -->
+                    <div class="middle-column">
+                        <div class="members-section">
+                            <label class="section-title">Details</label>
+                            <ul class="members-list">
+                                <li class="member-item">
+                                    <div class="member-header">
+                                        <span class="member-name">{{ element.details }}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="comments-section">
+                            <label class="section-title">Comments ({{ comments.count }})</label>
+                            <form method="POST" action="{% url 'element_comments' element.section.agenda.id element.section.id element.id %}" class="create-form">
+                                {% csrf_token %}
+                                <textarea name="comment" rows="3" placeholder="Add a comment..." required></textarea>
+                                <button type="submit" class="btn">Comment</button>
+                            </form>
+
+                            {% for comment in comments %}
+                                <div class="comment">
+                                    <div class="comment-header">
+                                        <strong>{{ comment.user.username }}</strong>
+                                        <small class="timestamp" data-time="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"F d, Y H:i" }}</small>
+                                    </div>
+                                    <p>{{ comment.text }}</p>
+                                    {% if is_creator or is_editor %}
+                                        <form method="POST" action="{% url 'delete_comment' agenda.id section.id element.id comment.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-submit btn-small" onclick="return confirm('Are you sure you want to delete this comment?')" style="float: right;">Delete</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                {% empty %}
+                                <p>No comments yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="right-column">
+                        <div class="urgent-section">
+                            <label class="section-title">Element Status</label>
+                            <form method="POST" action="{% url 'flag_element' agenda.id section.id element.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="flag_type" value="urgent">
+                                {% if request.user in element.urgent.all %}
+                                    <input type="hidden" name="action" value="remove">
+                                    <button type="submit" class="btn warning">🚨 Unmark</button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="add">
+                                    <button type="submit" class="btn warning">🚨 Urgent</button>
+                                {% endif %}
+                            </form>
+
+                            <form method="POST" action="{% url 'flag_element' agenda.id section.id element.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="flag_type" value="completed">
+                                {% if request.user in element.completed.all %}
+                                    <input type="hidden" name="action" value="remove">
+                                    <button type="submit" class="btn success">✓ Unmark</button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="add">
+                                    <button type="submit" class="btn success">✓ Completed</button>
+                                {% endif %}
+                            </form>
+
+                            <div class="status-indicators">
+                                {% if element.urgent.exists %}
+                                    <p>Users who marked as urgent: 
+                                        {{ element.urgent.all|join:", " }}
+                                    </p>
+                                {% endif %}
+
+                                {% if element.completed.exists %}
+                                    <p>Users who marked as completed: 
+                                        {{ element.completed.all|join:", " }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {% empty %}
-                <p>No comments yet.</p>
-            {% endfor %}
+            </div>
         </div>
+        <!-- --- -->
         
-        <a href="{% url 'view_agenda' element.section.agenda.id %}" class="btn">Back to Agenda</a>
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>&copy; 2025 Aghendi. All rights reserved.</p>
+        </div>
+        <!-- --- -->
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
         <script>
