@@ -1244,7 +1244,7 @@ input[type="checkbox"] {
     border-radius: 4px;
 }
 
-.element-item {
+.day-events .element-item {
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
     text-decoration: none;
@@ -1255,17 +1255,17 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-.element-item:hover {
+.day-events .element-item:hover {
     transform: translateY(-1px);
     background-color: var(--accent-color);
     color: white;
 }
 
-.element-item.urgent {
+.day-events .element-item.urgent {
     border-left: 3px solid #dc3545;
 }
 
-.element-item.completed {
+.day-events .element-item.completed {
     opacity: 0.6;
     text-decoration: line-through;
 }
