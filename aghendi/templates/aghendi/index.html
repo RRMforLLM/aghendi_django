@@ -74,7 +74,32 @@
         
         <!-- MAIN -->
         {% if not user.is_authenticated %}
-            <img src="{% static filler.png %}">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Unite. Plan. Achieve.</h1>
+                    <p class="hero-subtitle">Bring your team together and turn your ideas into reality with Aghendi's collaborative agenda management platform.</p>
+                    
+                    <div class="hero-buttons">
+                        <a href="{% url 'signup' %}" class="hero-button primary">Get Started Free</a>
+                        <a href="{% url 'login' %}" class="hero-button secondary">Sign In</a>
+                    </div>
+                </div>
+        
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>Collaborative Planning</h3>
+                        <p>Create and share agendas with your team in real-time. Everyone stays on the same page.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Easy Organization</h3>
+                        <p>Keep all your projects and meetings organized in one place. No more scattered plans.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Track Progress</h3>
+                        <p>Monitor project advancement and keep everyone accountable with built-in tracking tools.</p>
+                    </div>
+                </div>
+            </div>
         {% else %}
             <div class="main">
                 <div class="auth-section">
