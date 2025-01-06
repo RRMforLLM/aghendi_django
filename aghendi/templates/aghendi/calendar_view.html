@@ -36,6 +36,37 @@
                     }, 100);
                 });
             });
+
+            // Add this after the existing messages script
+            document.addEventListener('DOMContentLoaded', function() {
+                // Get current date in user's timezone
+                const now = new Date();
+                const userCurrentDay = now.getDate();
+                const userCurrentMonth = now.getMonth() + 1; // JavaScript months are 0-based
+                const userCurrentYear = now.getFullYear();
+
+                // Get the calendar data from the rendered page
+                const renderedYear = parseInt("{{ year }}");
+                const renderedMonth = parseInt("{{ month }}");
+
+                // Update the "today" class based on user's timezone
+                document.querySelectorAll('.calendar-day').forEach(day => {
+                    const dayNumber = day.querySelector('.day-number');
+                    if (dayNumber) {
+                        const dayValue = parseInt(dayNumber.textContent);
+                        
+                        // Remove the server-side today class
+                        day.classList.remove('today');
+                        
+                        // Apply the today class if it matches user's current date
+                        if (dayValue === userCurrentDay && 
+                            renderedMonth === userCurrentMonth && 
+                            renderedYear === userCurrentYear) {
+                            day.classList.add('today');
+                        }
+                    }
+                });
+            });
         </script>
         <!-- --- -->
 
@@ -117,7 +148,7 @@
                             {% for week in calendar %}
                                 <tr>
                                     {% for day in week %}
-                                        <td class="calendar-day {% if day == 0 %}empty{% endif %} {% if day == current_day and month == current_month and year == current_year %}today{% endif %}">
+                                        <td class="calendar-day {% if day == 0 %}empty{% endif %}">
                                             {% if day != 0 %}
                                                 <div class="day-number">{{ day }}</div>
                                                 {% with day_padded=day|stringformat:"02d" %}
