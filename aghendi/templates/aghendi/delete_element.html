@@ -72,7 +72,7 @@
                         <button type="submit" class="btn">Confirm</button>
                     </form>
                     <div class="alternative-op">
-                        <a href="{% url 'view_agenda' element.section.agenda.id %}">Return to Agenda</a>
+                        <a href="{% url 'element_detail' agenda.id section.id element.id %}">Return to Element</a>
                     </div>
                 </div>
             </div>
