@@ -19,5 +19,4 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('aghendi.urls')),
-    path('aghendi/', include('aghendi.urls')),
 ]
