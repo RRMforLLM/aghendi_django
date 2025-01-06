@@ -813,6 +813,7 @@ def delete_element(request, agenda_id, section_id, element_id):
         section__agenda__creator=request.user
     )
     agenda = element.section.agenda
+    section = element.section
 
     if request.user != agenda.creator and request.user not in agenda.editors.all():
         messages.error(request, "You do not have permission to delete this element.")
@@ -825,7 +826,11 @@ def delete_element(request, agenda_id, section_id, element_id):
         messages.success(request, f"Element '{element.subject}' has been deleted.")
         return redirect('view_agenda', agenda_id=agenda_id)
 
-    return render(request, 'aghendi/delete_element.html', {'element': element})
+    return render(request, 'aghendi/delete_element.html', {
+        'element': element,
+        'agenda': agenda,
+        'section': section
+    })
 
 def send_comment_notification_emails(agenda, element, comment, request):
     recipient_emails = set()
