@@ -426,11 +426,15 @@ textarea {
         grid-template-columns: 1fr;
     }
     
-    .left-column, .right-column {
-        order: 2;
+    .left-column {
+        order: 3;
     }
     
     .middle-column {
+        order: 2;
+    }
+
+    .right-column {
         order: 1;
     }
 }
