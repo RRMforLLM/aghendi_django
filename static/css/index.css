@@ -996,6 +996,10 @@ input[type="checkbox"] {
     scrollbar-color: var(--accent-color) var(--background-primary);
 }
 
+.comments-container p {
+    color: var(--text-primary)
+}
+
 /* Webkit scrollbar styling */
 .comments-container::-webkit-scrollbar {
     width: 8px;
