@@ -243,10 +243,17 @@ a {
 /* Footer */
 .footer {
     text-align: center;
-    padding: 1.5rem;
+    padding: 1rem;
     background-color: var(--background-secondary);
     color: var(--text-secondary);
     box-shadow: 0 -2px 4px var(--shadow-color);
+}
+
+.disclaimer {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    max-width: 600px;
+    margin: 0.5rem auto 0;
 }
 
 /* Animations */
@@ -997,7 +1004,7 @@ input[type="checkbox"] {
 }
 
 .comments-container p {
-    color: var(--text-primary)
+    color: var(--text-primary);
 }
 
 /* Webkit scrollbar styling */
