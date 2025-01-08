@@ -339,6 +339,7 @@ a {
     font-weight: 500;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
+    text-align: left;
 }
 
 textarea {
@@ -1004,7 +1005,7 @@ input[type="checkbox"] {
 }
 
 .comments-container p {
-    color: var(--text-primary);
+    color: var(--text-secondary);
 }
 
 /* Webkit scrollbar styling */
