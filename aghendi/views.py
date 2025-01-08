@@ -27,7 +27,7 @@ def send_login_notification(user):
     Hello {user.username},
     
     We detected a new login to your account on:
-    {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.
+    {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC.
     
     If this wasn't you, please contact support immediately.
     
