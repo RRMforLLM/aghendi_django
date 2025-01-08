@@ -88,39 +88,63 @@ def get_rate_limit_key(request, username):
 
 def login(request):
     if request.method == "POST":
-        username = request.POST['username']
+        username_or_email = request.POST['username_or_email']
         password = request.POST['password']
         
-        username_key = get_rate_limit_key(request, username)
+        username_key = get_rate_limit_key(request, username_or_email)
         ip_key = get_rate_limit_key(request, None)
         
         username_attempts = cache.get(username_key, 0)
         if username_attempts >= 5:
-            lockout_duration = 15 * 60
-            if not cache.get(f"lockout_{username_key}"):
-                cache.set(f"lockout_{username_key}", True, timeout=lockout_duration)
+            lockout_duration = 15 * 60  # 15 minutes in seconds
+            lockout_key = f"lockout_{username_key}"
             
-            minutes_left = round(cache.ttl(f"lockout_{username_key}") / 60)
+            # Check if user is locked out
+            is_locked = cache.get(lockout_key)
+            if not is_locked:
+                # If not locked, create new lockout
+                cache.set(lockout_key, True, timeout=lockout_duration)
+                
             messages.error(
                 request,
-                f"Too many failed attempts for this username. Please try again in {minutes_left} minutes."
+                "Too many failed attempts. Please try again in 15 minutes."
             )
             return render(request, 'aghendi/login.html', {'show_reset': True})
         
         ip_attempts = cache.get(ip_key, 0)
         if ip_attempts >= 20:
-            lockout_duration = 30 * 60
-            if not cache.get(f"lockout_{ip_key}"):
-                cache.set(f"lockout_{ip_key}", True, timeout=lockout_duration)
+            lockout_duration = 30 * 60  # 30 minutes in seconds
+            lockout_key = f"lockout_{ip_key}"
             
-            minutes_left = round(cache.ttl(f"lockout_{ip_key}") / 60)
+            # Check if IP is locked out
+            is_locked = cache.get(lockout_key)
+            if not is_locked:
+                # If not locked, create new lockout
+                cache.set(lockout_key, True, timeout=lockout_duration)
+                
             messages.error(
                 request,
-                f"Too many login attempts from this location. Please try again in {minutes_left} minutes."
+                "Too many login attempts from this location. Please try again in 30 minutes."
             )
             return render(request, 'aghendi/login.html', {'show_reset': True})
         
-        user = authenticate(request, username=username, password=password)
+        # Try to authenticate with username first
+        user = authenticate(request, username=username_or_email, password=password)
+        
+        # If authentication fails, try with email
+        if user is None:
+            try:
+                # Filter users by email instead of get() to handle multiple users
+                matching_users = User.objects.filter(email=username_or_email)
+                
+                # Try to authenticate with each matching user's credentials
+                for user_obj in matching_users:
+                    user = authenticate(request, username=user_obj.username, password=password)
+                    if user is not None:
+                        break
+                        
+            except Exception:
+                user = None
         
         if user is not None:
             auth_login(request, user)
@@ -143,10 +167,10 @@ def login(request):
             if remaining_username_attempts > 0:
                 messages.error(
                     request,
-                    f"Invalid credentials. {remaining_username_attempts} attempts remaining for this username."
+                    f"Invalid credentials. {remaining_username_attempts} attempts remaining."
                 )
             else:
-                messages.error(request, "Invalid username or password")
+                messages.error(request, "Invalid username/email or password")
             
             request.session['failed_login'] = True
             
@@ -173,15 +197,20 @@ def signup(request):
         if password == confirm_password:
             if User.objects.filter(username=username).exists():
                 messages.error(request, "Username already exists")
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, "Email already registered")
             else:
-                user = User.objects.create_user(username=username, email=email, password=password)
-                messages.success(request, "Account created successfully! You can log in now.")
+                # Check number of accounts with this email
+                existing_accounts = User.objects.filter(email=email).count()
+                max_accounts_per_email = 1
                 
-                send_welcome_email(user)
-                
-                return redirect('login')
+                if existing_accounts >= max_accounts_per_email:
+                    messages.error(request, f"This email is already associated with the maximum allowed number of accounts")
+                else:
+                    user = User.objects.create_user(username=username, email=email, password=password)
+                    messages.success(request, "Account created successfully! You can log in now.")
+                    
+                    send_welcome_email(user)
+                    
+                    return redirect('login')
         else:
             messages.error(request, "Passwords do not match")
             
