@@ -777,7 +777,6 @@ textarea {
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 1rem;
 }
 
 .section-name {
@@ -1074,6 +1073,10 @@ input[type="checkbox"] {
 }
 
 /* Comment Form */
+.create-form.comment-form {
+    margin-top: 1rem;
+}
+
 .create-form textarea {
     width: 100%;
     padding: 0.8rem 1rem;
@@ -1081,7 +1084,6 @@ input[type="checkbox"] {
     border-radius: 8px;
     background-color: var(--background-primary);
     color: var(--text-primary);
-    margin-bottom: 1rem;
 }
 
 .create-form textarea:focus {
