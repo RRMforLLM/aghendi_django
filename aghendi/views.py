@@ -87,6 +87,10 @@ def get_rate_limit_key(request, username):
     return f"login_attempts_ip_{client_ip}"
 
 def login(request):
+    if request.user.is_authenticated:
+        messages.success(request, "You are already logged in!")
+        return redirect('index')
+    
     if request.method == "POST":
         username_or_email = request.POST['username_or_email']
         password = request.POST['password']
@@ -178,6 +182,10 @@ def login(request):
     return render(request, 'aghendi/login.html', {'show_reset': show_reset})
 
 def signup(request):
+    if request.user.is_authenticated:
+        messages.success(request, "You are already using an account!")
+        return redirect('index')
+    
     if request.method == "POST":
         username = request.POST['username']
         email = request.POST['email']
