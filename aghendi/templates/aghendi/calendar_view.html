@@ -1,204 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ agenda.name }} - Aghendi</title>
-        {% load static %}
-        {% load calendar_tags %}
-        <link rel="stylesheet" href="{% static 'css/index.css' %}">
-        <link rel="icon" href="{% static 'logo.png' %}">
-        <script src="{% static 'js/theme.js' %}"></script>
+{% extends 'base.html' %}
 
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1251478980297978"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <!-- NOTIFICATIONS -->
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+{% block title %}{{ agenda.name }} - Aghendi{% endblock %}
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const messages = document.querySelectorAll('.message');
-                messages.forEach((message, index) => {
-                    setTimeout(() => {
-                        message.addEventListener('animationend', (e) => {
-                            if (e.animationName === 'fadeOut') {
-                                message.remove();
-                            }
-                        });
-                    }, 100);
-                });
-            });
+{% block content %}
+    {% load calendar_tags %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
 
-            // Add this after the existing messages script
-            document.addEventListener('DOMContentLoaded', function() {
-                // Get current date in user's timezone
-                const now = new Date();
-                const userCurrentDay = now.getDate();
-                const userCurrentMonth = now.getMonth() + 1; // JavaScript months are 0-based
-                const userCurrentYear = now.getFullYear();
+            const userCurrentDay = now.getDate();
+            const userCurrentMonth = now.getMonth() + 1;
+            const userCurrentYear = now.getFullYear();
 
-                // Get the calendar data from the rendered page
-                const renderedYear = parseInt("{{ year }}");
-                const renderedMonth = parseInt("{{ month }}");
+            const renderedYear = parseInt("{{ year }}");
+            const renderedMonth = parseInt("{{ month }}");
 
-                // Update the "today" class based on user's timezone
-                document.querySelectorAll('.calendar-day').forEach(day => {
-                    const dayNumber = day.querySelector('.day-number');
-                    if (dayNumber) {
-                        const dayValue = parseInt(dayNumber.textContent);
-                        
-                        // Remove the server-side today class
-                        day.classList.remove('today');
-                        
-                        // Apply the today class if it matches user's current date
-                        if (dayValue === userCurrentDay && 
-                            renderedMonth === userCurrentMonth && 
-                            renderedYear === userCurrentYear) {
-                            day.classList.add('today');
-                        }
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                const dayNumber = day.querySelector('.day-number');
+                if (dayNumber) {
+                    const dayValue = parseInt(dayNumber.textContent);
+                    
+                    day.classList.remove('today');
+                    
+                    if (dayValue === userCurrentDay && 
+                        renderedMonth === userCurrentMonth && 
+                        renderedYear === userCurrentYear) {
+                        day.classList.add('today');
                     }
-                });
+                }
             });
-        </script>
-        <!-- --- -->
+        });
+    </script>
 
-        <!-- NAVBAR -->
-        <div class="navbar">
-            <a href="{% url 'index' %}">
-                <label class="nav-title">Aghendi</label>
-            </a>
-            <div class="navbar-right">
-                {% if not user.is_authenticated %}
-                    <div class="auth-links">
-                        <a href="{% url 'login' %}">
-                            <button class="btn">Login</button>
-                        </a>
-                        <a href="{% url 'signup' %}">
-                            <button class="btn">Signup</button>
-                        </a>
-                    </div>
-                {% else %}
-                    <div class="action-buttons">
-                        <a href="{% url 'logout' %}">
-                            <button class="btn">Logout</button>
-                        </a>
-                    </div>
-                {% endif %}
-                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
-            </div>
+    <!-- MAIN -->
+    <div class="main">
+        <div class="auth-section">
+            <label class="location">{{ agenda.name }} - Calendar</label>
         </div>
-        <!-- --- -->
 
-        <!-- MAIN -->
-        <div class="main">
-            <div class="auth-section">
-                <label class="location">{{ agenda.name }} - Calendar</label>
-            </div>
-
-            <div class="display-section">
-                <div class="calendar-container">
-                    <div class="sections-header">
-                        <div class="calendar-nav">
-                            <a href="?year={{ prev_year }}&month={{ prev_month }}&section={{ selected_section }}" class="btn">
-                                &lt;
-                            </a>
-                            <span class="current-month">{{ month_name }} {{ year }}</span>
-                            <a href="?year={{ next_year }}&month={{ next_month }}&section={{ selected_section }}" class="btn">
-                                &gt;
-                            </a>
-                        </div>
-
-                        <div class="section-filter">
-                            <form method="GET">
-                                <input type="hidden" name="year" value="{{ year }}">
-                                <input type="hidden" name="month" value="{{ month }}">
-                                <select name="section" onchange="this.form.submit()" class="section-select">
-                                    <option value="">All Sections</option>
-                                    {% for section in sections %}
-                                        <option value="{{ section.id }}" {% if selected_section == section.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ section.name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </form>
-                        </div>
+        <div class="display-section">
+            <div class="calendar-container">
+                <div class="sections-header">
+                    <div class="calendar-nav">
+                        <a href="?year={{ prev_year }}&month={{ prev_month }}&section={{ selected_section }}" class="btn">
+                            &lt;
+                        </a>
+                        <span class="current-month">{{ month_name }} {{ year }}</span>
+                        <a href="?year={{ next_year }}&month={{ next_month }}&section={{ selected_section }}" class="btn">
+                            &gt;
+                        </a>
                     </div>
 
-                    <table class="calendar">
-                        <thead>
+                    <div class="section-filter">
+                        <form method="GET">
+                            <input type="hidden" name="year" value="{{ year }}">
+                            <input type="hidden" name="month" value="{{ month }}">
+                            <select name="section" onchange="this.form.submit()" class="section-select">
+                                <option value="">All Sections</option>
+                                {% for section in sections %}
+                                    <option value="{{ section.id }}" {% if selected_section == section.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ section.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <table class="calendar">
+                    <thead>
+                        <tr>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                            <th>Sun</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in calendar %}
                             <tr>
-                                <th>Mon</th>
-                                <th>Tue</th>
-                                <th>Wed</th>
-                                <th>Thu</th>
-                                <th>Fri</th>
-                                <th>Sat</th>
-                                <th>Sun</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for week in calendar %}
-                                <tr>
-                                    {% for day in week %}
-                                        <td class="calendar-day {% if day == 0 %}empty{% endif %}">
-                                            {% if day != 0 %}
-                                                <div class="day-number">{{ day }}</div>
-                                                {% with day_padded=day|stringformat:"02d" %}
-                                                    {% with month_padded=month|stringformat:"02d" %}
-                                                        {% with current_date=year|stringformat:"d"|add:"-"|add:month_padded|add:"-"|add:day_padded %}
-                                                            <div class="day-events">
-                                                                {% with emission_events=emission_dates|get_item:current_date %}
-                                                                    {% for event in emission_events %}
-                                                                        <a href="{% url 'element_detail' agenda.id event.section_id event.id %}" 
-                                                                        class="element-item {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
-                                                                            📅 {{ event.subject }}
-                                                                        </a>
-                                                                    {% endfor %}
-                                                                {% endwith %}
-                                                                
-                                                                {% with deadline_events=deadline_dates|get_item:current_date %}
-                                                                    {% for event in deadline_events %}
-                                                                        <a href="{% url 'element_detail' agenda.id event.section_id event.id %}"
-                                                                        class="element-item deadline {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
-                                                                            ⚠️ {{ event.subject }}
-                                                                        </a>
-                                                                    {% endfor %}
-                                                                {% endwith %}
-                                                            </div>
-                                                        {% endwith %}
+                                {% for day in week %}
+                                    <td class="calendar-day {% if day == 0 %}empty{% endif %}">
+                                        {% if day != 0 %}
+                                            <div class="day-number">{{ day }}</div>
+                                            {% with day_padded=day|stringformat:"02d" %}
+                                                {% with month_padded=month|stringformat:"02d" %}
+                                                    {% with current_date=year|stringformat:"d"|add:"-"|add:month_padded|add:"-"|add:day_padded %}
+                                                        <div class="day-events">
+                                                            {% with emission_events=emission_dates|get_item:current_date %}
+                                                                {% for event in emission_events %}
+                                                                    <a href="{% url 'element_detail' agenda.id event.section_id event.id %}" 
+                                                                    class="element-item {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
+                                                                        📅 {{ event.subject }}
+                                                                    </a>
+                                                                {% endfor %}
+                                                            {% endwith %}
+                                                            
+                                                            {% with deadline_events=deadline_dates|get_item:current_date %}
+                                                                {% for event in deadline_events %}
+                                                                    <a href="{% url 'element_detail' agenda.id event.section_id event.id %}"
+                                                                    class="element-item deadline {% if event.urgent %}urgent{% endif %} {% if event.completed %}completed{% endif %}">
+                                                                        ⚠️ {{ event.subject }}
+                                                                    </a>
+                                                                {% endfor %}
+                                                            {% endwith %}
+                                                        </div>
                                                     {% endwith %}
                                                 {% endwith %}
-                                            {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                            {% endwith %}
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-                    <div class="agenda-actions">
-                        <a href="{% url 'view_agenda' agenda.id %}">
-                            <button class="btn">Back to Agenda</button>
-                        </a>
-                    </div>
+                <div class="agenda-actions">
+                    <a href="{% url 'view_agenda' agenda.id %}">
+                        <button class="btn">Back to Agenda</button>
+                    </a>
                 </div>
             </div>
         </div>
-        <!-- --- -->
-
-        <!-- FOOTER -->
-        <div class="footer">
-            <p>&copy; 2025 Aghendi. All rights reserved.</p>
-            <p class="disclaimer">Contact us: aghendi.mail@gmail.com</p>
-        </div>
-        <!-- --- -->
-    </body>
-</html>
+    </div>
+    <!-- --- -->
+{% endblock %}

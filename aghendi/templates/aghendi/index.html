@@ -1,172 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'base.html' %}
 
-        {% if not user.is_authenticated %}
-            <title>Aghendi - Unite. Plan. Achieve.</title>
-        {% else %}
-            <title>Aghendi</title>
-        {% endif %}
+{% block title %}
+    {% if not user.is_authenticated %}
+        Aghendi - Unite. Plan. Achieve.
+    {% else %}
+        Aghendi
+    {% endif %}
+{% endblock %}
 
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'css/index.css' %}">
-        <link rel="icon" href="{% static 'logo.png' %}">
-        <script src="{% static 'js/theme.js' %}"></script>
-        
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1251478980297978"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <!-- NOTIFICATIONS -->
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
+{% block content %}
+    <!-- MAIN -->
+    {% if not user.is_authenticated %}
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Unite. Plan. Achieve.</h1>
+                <p class="hero-subtitle">Bring your team together and turn your ideas into reality with Aghendi's collaborative agenda management platform.</p>
+                
+                <div class="hero-buttons">
+                    <a href="{% url 'signup' %}" class="hero-button primary">Get Started Free</a>
+                    <a href="{% url 'login' %}" class="hero-button secondary">Sign In</a>
+                </div>
             </div>
-        {% endif %}
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const messages = document.querySelectorAll('.message');
-                messages.forEach((message, index) => {
-                    setTimeout(() => {
-                        message.addEventListener('animationend', (e) => {
-                            if (e.animationName === 'fadeOut') {
-                                message.remove();
-                            }
-                        });
-                    }, 100);
-                });
-            });
-        </script>
-        <!-- --- -->
-        
-        <!-- NAVBAR -->
-        <div class="navbar">
-            <a href="{% url 'index' %}">
-                <label class="nav-title">Aghendi</label>
-            </a>
-        
-            <div class="navbar-right">
-                {% if not user.is_authenticated %}
-                    <div class="auth-links">
-                        <a href="{% url 'login' %}">
-                            <button class="btn">Login</button>
-                        </a>
-                        <a href="{% url 'signup' %}">
-                            <button class="btn">Signup</button>
-                        </a>
-                    </div>
-                {% else %}
-                    <div class="action-buttons">
-                        <a href="{% url 'logout' %}">
-                            <button class="btn">Logout</button>
-                        </a>
-                    </div>
-                {% endif %}
-                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
+    
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Collaborative Planning</h3>
+                    <p>Create and share agendas with your team in real-time. Everyone stays on the same page.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Easy Organization</h3>
+                    <p>Keep all your projects and meetings organized in one place. No more scattered plans.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Track Progress</h3>
+                    <p>Monitor project advancement and keep everyone accountable with built-in tracking tools.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Calendar Integration</h3>
+                    <p>View deadlines and events in an intuitive calendar format. Never miss important dates.</p>
+                </div>
             </div>
         </div>
-        <!-- --- -->
-        
-        <!-- MAIN -->
-        {% if not user.is_authenticated %}
-            <div class="hero-section">
-                <div class="hero-content">
-                    <h1 class="hero-title">Unite. Plan. Achieve.</h1>
-                    <p class="hero-subtitle">Bring your team together and turn your ideas into reality with Aghendi's collaborative agenda management platform.</p>
-                    
-                    <div class="hero-buttons">
-                        <a href="{% url 'signup' %}" class="hero-button primary">Get Started Free</a>
-                        <a href="{% url 'login' %}" class="hero-button secondary">Sign In</a>
-                    </div>
-                </div>
-        
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <h3>Collaborative Planning</h3>
-                        <p>Create and share agendas with your team in real-time. Everyone stays on the same page.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h3>Easy Organization</h3>
-                        <p>Keep all your projects and meetings organized in one place. No more scattered plans.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h3>Track Progress</h3>
-                        <p>Monitor project advancement and keep everyone accountable with built-in tracking tools.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h3>Calendar Integration</h3>
-                        <p>View deadlines and events in an intuitive calendar format. Never miss important dates.</p>
-                    </div>
+    {% else %}
+        <div class="main">
+            <div class="auth-section">
+                <label class="welcome">So {{ user.username }}, what's next?</label>
+                <div class="agenda-buttons">
+                    <a href="{% url 'create_agenda' %}">
+                        <button class="btn">Create</button>
+                    </a>
+                    <a href="{% url 'join_agenda' %}">
+                        <button class="btn">Join</button>
+                    </a>
                 </div>
             </div>
-        {% else %}
-            <div class="main">
-                <div class="auth-section">
-                    <label class="welcome">So {{ user.username }}, what's next?</label>
-                    <div class="agenda-buttons">
-                        <a href="{% url 'create_agenda' %}">
-                            <button class="btn">Create</button>
-                        </a>
-                        <a href="{% url 'join_agenda' %}">
-                            <button class="btn">Join</button>
-                        </a>
-                    </div>
-                </div>
-                
-                {% if user.created_agendas.exists or user.joined_agendas.exists %}
-                    <div class="display-section">
-                        <div class="agendas-display">
-                            <div class="agenda-categories">
+            
+            {% if user.created_agendas.exists or user.joined_agendas.exists %}
+                <div class="display-section">
+                    <div class="agendas-display">
+                        <div class="agenda-categories">
+                            {% if user.created_agendas.exists %}
+                                <div class="agenda-category">
+                                    <label class="agenda-display-title">Created</label>
+                                    <div class="agenda-thumbnails">
+                                        {% for agenda in user.created_agendas.all %}
+                                        <a href="{% url 'view_agenda' agenda.id %}">
+                                            <div class="agenda-thumbnail">
+                                                <label>{{ agenda.name }}</label>
+                                            </div>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
 
-                                {% if user.created_agendas.exists %}
-                                    <div class="agenda-category">
-                                        <label class="agenda-display-title">Created</label>
-                                        <div class="agenda-thumbnails">
-                                            {% for agenda in user.created_agendas.all %}
-                                            <a href="{% url 'view_agenda' agenda.id %}">
-                                                <div class="agenda-thumbnail">
+                            {% if user.joined_agendas.exists %}
+                                <div class="agenda-category">
+                                    <label class="agenda-display-title">Joined</label>
+                                    <div class="agenda-thumbnails">
+                                        {% for agenda in user.joined_agendas.all %}
+                                            {% if agenda.creator != user %}
+                                                <a href="{% url 'view_agenda' agenda.id %}">
+                                                    <div class="agenda-thumbnail">
                                                         <label>{{ agenda.name }}</label>
-                                                </div>
-                                            </a>
-                                            {% endfor %}
-                                        </div>
+                                                    </div>
+                                                </a>
+                                            {% endif %}
+                                        {% endfor %}
                                     </div>
-                                {% endif %}
-
-                                {% if user.joined_agendas.exists %}
-                                    <div class="agenda-category">
-                                        <label class="agenda-display-title">Joined</label>
-                                        <div class="agenda-thumbnails">
-                                            {% for agenda in user.joined_agendas.all %}
-                                                {% if agenda.creator != user %}
-                                                    <a href="{% url 'view_agenda' agenda.id %}">
-                                                        <div class="agenda-thumbnail">
-                                                                <label>{{ agenda.name }}</label>
-                                                        </div>
-                                                    </a>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                {% endif %}
-            </div>
-        {% endif %}
-        <!-- --- -->
-        
-        <!-- FOOTER -->
-        <div class="footer">
-            <p>&copy; 2025 Aghendi. All rights reserved.</p>
-            <p class="disclaimer">Contact us: aghendi.mail@gmail.com</p>
+                </div>
+            {% endif %}
         </div>
-        <!-- --- -->
-    </body>
-</html>
+    {% endif %}
+    <!-- --- -->
+{% endblock %}

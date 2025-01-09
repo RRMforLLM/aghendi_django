@@ -1,105 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ section.name }} - {{ agenda.name }} - Aghendi</title>
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'css/index.css' %}">
-        <link rel="icon" href="{% static 'logo.png' %}">
-        <script src="{% static 'js/theme.js' %}"></script>
+{% extends 'base.html' %}
 
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1251478980297978"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <!-- NOTIFICATIONS -->
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+{% block title %}{{ section.name }} - {{ agenda.name }} - Aghendi{% endblock %}
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const messages = document.querySelectorAll('.message');
-                messages.forEach((message, index) => {
-                    setTimeout(() => {
-                        message.addEventListener('animationend', (e) => {
-                            if (e.animationName === 'fadeOut') {
-                                message.remove();
-                            }
-                        });
-                    }, 100);
-                });
-            });
-        </script>
-        <!-- --- -->
-        
-        <!-- NAVBAR -->
-        <div class="navbar">
-            <a href="{% url 'index' %}">
-                <label class="nav-title">Aghendi</label>
-            </a>
-            <div class="navbar-right">
-                {% if not user.is_authenticated %}
-                    <div class="auth-links">
-                        <a href="{% url 'signup' %}">
-                            <button class="btn">Signup</button>
-                        </a>
+{% block content %}
+    <!-- MAIN -->
+    <div class="main">
+        <div class="auth-section">
+            <label class="location">Add Element</label>
+            <div class="form-section">
+                <form method="POST" class="login-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" name="subject" placeholder="Enter element subject" required>
                     </div>
-                {% else %}
-                    <div class="action-buttons">
-                        <a href="{% url 'logout' %}">
-                            <button class="btn">Logout</button>
-                        </a>
+                    <div class="form-group">
+                        <label for="details">Details:</label>
+                        <textarea id="details" name="details" rows="4" placeholder="Enter element details" required></textarea>
                     </div>
-                {% endif %}
-                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
-            </div>
-        </div>
-        <!-- --- -->
-        
-        <!-- MAIN -->
-        <div class="main">
-            <div class="auth-section">
-                <label class="location">Add Element</label>
-                <div class="form-section">
-                    <form method="POST" class="login-form">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="subject">Subject:</label>
-                            <input type="text" id="subject" name="subject" placeholder="Enter element subject" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="details">Details:</label>
-                            <textarea id="details" name="details" rows="4" placeholder="Enter element details" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="emission">Emission:</label>
-                            <input type="date" id="emission" name="emission" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="deadline">Deadline:</label>
-                            <input type="date" id="deadline" name="deadline" required>
-                        </div>
-                        <button type="submit" class="btn">Create</button>
-                    </form>
-                    <div class="alternative-op">
-                        <a href="{% url 'view_agenda' section.agenda.id %}">Return to Agenda</a>
+                    <div class="form-group">
+                        <label for="emission">Emission:</label>
+                        <input type="date" id="emission" name="emission" required>
                     </div>
+                    <div class="form-group">
+                        <label for="deadline">Deadline:</label>
+                        <input type="date" id="deadline" name="deadline" required>
+                    </div>
+                    <button type="submit" class="btn">Create</button>
+                </form>
+                <div class="alternative-op">
+                    <a href="{% url 'view_agenda' section.agenda.id %}">Return to Agenda</a>
                 </div>
             </div>
         </div>
-        <!-- --- -->
-        
-        <!-- FOOTER -->
-        <div class="footer">
-            <p>&copy; 2025 Aghendi. All rights reserved.</p>
-            <p class="disclaimer">Contact us: aghendi.mail@gmail.com</p>
-        </div>
-        <!-- --- -->
-    </body>
-</html>
+    </div>
+    <!-- --- -->
+{% endblock %}

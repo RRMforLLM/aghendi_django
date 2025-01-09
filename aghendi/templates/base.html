@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %}</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/index.css' %}">
+        <link rel="icon" href="{% static 'logo.png' %}">
+        <script src="{% static 'js/theme.js' %}"></script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1251478980297978"
+        crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <!-- NOTIFICATIONS -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const messages = document.querySelectorAll('.message');
+                messages.forEach((message, index) => {
+                    setTimeout(() => {
+                        message.addEventListener('animationend', (e) => {
+                            if (e.animationName === 'fadeOut') {
+                                message.remove();
+                            }
+                        });
+                    }, 100);
+                });
+            });
+        </script>
+        <!-- --- -->
+
+        <!-- NAVBAR -->
+        <div class="navbar">
+            <a href="{% url 'index' %}">
+                <label class="nav-title">Aghendi</label>
+            </a>
+            <div class="navbar-right">
+                {% if not user.is_authenticated %}
+                    {% block auth %}
+                        <div class="auth-links">
+                            <a href="{% url 'login' %}">
+                                <button class="btn">Login</button>
+                            </a>
+                            <a href="{% url 'signup' %}">
+                                <button class="btn">Signup</button>
+                            </a>
+                        </div>
+                    {% endblock %}
+                {% else %}
+                    <div class="action-buttons">
+                        <a href="{% url 'logout' %}">
+                            <button class="btn">Logout</button>
+                        </a>
+                    </div>
+                {% endif %}
+                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
+            </div>
+        </div>
+        <!-- --- -->
+
+        {% block content %}{% endblock %}
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>&copy; 2025 Aghendi. All rights reserved.</p>
+            <p class="disclaimer">Contact us: aghendi.mail@gmail.com</p>
+        </div>
+        <!-- --- -->
+    </body>
+</html>

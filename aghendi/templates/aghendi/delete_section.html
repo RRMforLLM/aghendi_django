@@ -1,92 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ section.name }} - {{ agenda.name }} - Aghendi</title>
-        {% load static %}
-        <link rel="stylesheet" href="{% static 'css/index.css' %}">
-        <link rel="icon" href="{% static 'logo.png' %}">
-        <script src="{% static 'js/theme.js' %}"></script>
+{% extends 'base.html' %}
 
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1251478980297978"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <!-- NOTIFICATIONS -->
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+{% block title %}{{ section.name }} - {{ agenda.name }} - Aghendi{% endblock %}
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const messages = document.querySelectorAll('.message');
-                messages.forEach((message, index) => {
-                    setTimeout(() => {
-                        message.addEventListener('animationend', (e) => {
-                            if (e.animationName === 'fadeOut') {
-                                message.remove();
-                            }
-                        });
-                    }, 100);
-                });
-            });
-        </script>
-        <!-- --- -->
-        
-        <!-- NAVBAR -->
-        <div class="navbar">
-            <a href="{% url 'index' %}">
-                <label class="nav-title">Aghendi</label>
-            </a>
-            <div class="navbar-right">
-                {% if not user.is_authenticated %}
-                    <div class="auth-links">
-                        <a href="{% url 'signup' %}">
-                            <button class="btn">Signup</button>
-                        </a>
+{% block content %}
+    <!-- MAIN -->
+    <div class="main">
+        <div class="auth-section">
+            <label class="location">Delete Section</label>
+            <div class="form-section">
+                <form method="POST" class="login-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Are you sure you want to delete "{{ section.name }}" section? This action is irreversible.</label>
                     </div>
-                {% else %}
-                    <div class="action-buttons">
-                        <a href="{% url 'logout' %}">
-                            <button class="btn">Logout</button>
-                        </a>
-                    </div>
-                {% endif %}
-                <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></button>
-            </div>
-        </div>
-        <!-- --- -->
-        
-        <!-- MAIN -->
-        <div class="main">
-            <div class="auth-section">
-                <label class="location">Delete Section</label>
-                <div class="form-section">
-                    <form method="POST" class="login-form">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label>Are you sure you want to delete "{{ section.name }}" section? This action is irreversible.</label>
-                        </div>
-                        <button type="submit" class="btn">Confirm</button>
-                    </form>
-                    <div class="alternative-op">
-                        <a href="{% url 'view_agenda' section.agenda.id %}">Return to Agenda</a>
-                    </div>
+                    <button type="submit" class="btn">Confirm</button>
+                </form>
+                <div class="alternative-op">
+                    <a href="{% url 'view_agenda' section.agenda.id %}">Return to Agenda</a>
                 </div>
             </div>
         </div>
-        <!-- --- -->
-        
-        <!-- FOOTER -->
-        <div class="footer">
-            <p>&copy; 2025 Aghendi. All rights reserved.</p>
-            <p class="disclaimer">Contact us: aghendi.mail@gmail.com</p>
-        </div>
-        <!-- --- -->
-    </body>
-</html>
+    </div>
+    <!-- --- -->
+{% endblock %}
