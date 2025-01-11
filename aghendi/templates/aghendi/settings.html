@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Aghendi{% endblock %}
+
+{% block content %}
+    <!-- MAIN -->
+    <div class="main">
+        <div class="settings-container">
+            <h1 class="settings-title">Account Settings</h1>
+            
+            <!-- Email Settings -->
+            <div class="settings-section">
+                <h2>Email Settings</h2>
+                <form method="POST" class="settings-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_email">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <button type="submit" class="btn">Update Email</button>
+                </form>
+            </div>
+    
+            <!-- Password Settings -->
+            <div class="settings-section">
+                <h2>Change Password</h2>
+                <form method="POST" class="settings-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_password">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input type="password" id="current_password" name="current_password" placeholder="Enter your current password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" placeholder="Enter your new password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your new password" required>
+                    </div>
+                    <button type="submit" class="btn">Change Password</button>
+                </form>
+            </div>
+    
+            <!-- Delete Account -->
+            <div class="settings-section danger-zone">
+                <h2>Delete Account</h2>
+                <p class="warning-text">Warning: This action cannot be undone. All your agendas will be deleted.</p>
+                <form method="POST" class="settings-form" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_account">
+                    <div class="form-group">
+                        <label for="confirm_delete_password">Enter Password to Confirm</label>
+                        <input type="password" id="confirm_delete_password" name="confirm_delete_password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn danger">Delete Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- --- -->
+{% endblock %}

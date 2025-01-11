@@ -21,6 +21,63 @@ from .forms import AgendaKeyForm
 def index(request):
     return render(request, 'aghendi/index.html')
 
+def about(request):
+    return render(request, 'aghendi/about.html')
+
+def privacy_policy(request):
+    return render(request, 'aghendi/privacy_policy.html')
+
+@login_required
+def settings_view(request):
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        if action == "update_email":
+            new_email = request.POST.get('email')
+            if new_email and new_email != request.user.email:
+                # Check if email already exists
+                if User.objects.filter(email=new_email).exclude(id=request.user.id).exists():
+                    messages.error(request, "This email is already in use.")
+                else:
+                    request.user.email = new_email
+                    request.user.save()
+                    messages.success(request, "Email updated successfully.")
+        
+        elif action == "update_password":
+            current_password = request.POST.get('current_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if current_password and new_password and confirm_password:
+                if request.user.check_password(current_password):
+                    if new_password == confirm_password:
+                        request.user.set_password(new_password)
+                        request.user.save()
+                        messages.success(request, "Password updated successfully. Please log in again.")
+                        return redirect('login')
+                    else:
+                        messages.error(request, "New passwords do not match.")
+                else:
+                    messages.error(request, "Current password is incorrect.")
+        
+        elif action == "delete_account":
+            password = request.POST.get('confirm_delete_password')
+            if password and request.user.check_password(password):
+                # Delete user's agendas
+                Agenda.objects.filter(creator=request.user).delete()
+                # Remove user from all agendas
+                for agenda in Agenda.objects.filter(members=request.user):
+                    agenda.members.remove(request.user)
+                    agenda.editors.remove(request.user)
+                # Delete the user
+                request.user.delete()
+                messages.success(request, "Your account has been deleted.")
+                return redirect('index')
+            else:
+                messages.error(request, "Incorrect password.")
+    
+    return render(request, 'aghendi/settings.html')
+
 def send_login_notification(user):
     subject = 'New Login to Your Account'
     message = f"""
@@ -40,29 +97,34 @@ def send_login_notification(user):
         message,
         settings.DEFAULT_FROM_EMAIL,
         [user.email],
-        fail_silently=True,
+        fail_silently=False,
     )
 
 def send_welcome_email(user):
-    subject = 'Welcome to Our Platform!'
-    message = f"""
-    Hello {user.username},
-    
-    Thank you for creating an account with us! We're excited to have you on board.
-    
-    You can now log in and start using our platform.
-    
-    Best regards,
-    Aghendi Team
-    """
-    
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=True,
-    )
+    try:
+        subject = 'Welcome to Our Platform!'
+        message = f"""
+        Hello {user.username},
+        
+        Thank you for creating an account with us! We're excited to have you on board.
+        
+        You can now log in and start using our platform.
+        
+        Best regards,
+        Aghendi Team
+        """
+        
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Error sending welcome email: {e}")
+        return False
 
 def get_client_ip(request):
     """Get the client's IP address"""
@@ -206,7 +268,6 @@ def signup(request):
             if User.objects.filter(username=username).exists():
                 messages.error(request, "Username already exists")
             else:
-                # Check number of accounts with this email
                 existing_accounts = User.objects.filter(email=email).count()
                 max_accounts_per_email = 1
                 
@@ -214,9 +275,12 @@ def signup(request):
                     messages.error(request, f"This email is already associated with the maximum allowed number of accounts")
                 else:
                     user = User.objects.create_user(username=username, email=email, password=password)
-                    messages.success(request, "Account created successfully! You can log in now.")
                     
-                    send_welcome_email(user)
+                    if send_welcome_email(user):
+                        messages.success(request, "Account created successfully! You can log in now. Welcome email sent.")
+                    else:
+                        messages.success(request, "Account created successfully! You can log in now.")
+                        messages.warning(request, "Could not send welcome email. Please check your email settings.")
                     
                     return redirect('login')
         else:

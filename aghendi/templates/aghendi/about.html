@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Aghendi{% endblock %}
+
+{% block content %}
+    <!-- MAIN -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Our Story</h1>
+            <p class="hero-subtitle">At Aghendi's place of origin, everything was scrambled across different ecosystems; some teachers would use classroom, whilst others opted for the school's platform of choice. Not to mention the ones that didn't even bother setting reminders or elaborating on any more information about the things that were todo in the class. Everything was a confusing cluster of scattered information.</p>
+            <p class="hero-subtitle">And so, Aghendi was born with a clear mission: to provide everyone with powerful tools to organize, maintain, and share agendas that classrooms can rely on whenever they need to know what's happening.</p>
+        </div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Our Mission</h1>
+            <p class="hero-subtitle">We believe that effective collaboration starts with clear organization. Our mission is to unify educational planning and communication in one accessible platform, making it easier for educators and students to stay synchronized and focused on what matters most: learning.</p>
+        </div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Why Choose Aghendi?</h1>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Unified Platform</h3>
+                    <p>Say goodbye to scattered information across multiple platforms. Aghendi brings everything together in one intuitive space.</p>
+                </div>
+    
+                <div class="feature-card">
+                    <h3>Collaborative Planning</h3>
+                    <p>Create and share agendas with your entire class. Students and teachers can stay updated in real-time with our collaborative tools.</p>
+                </div>
+    
+                <div class="feature-card">
+                    <h3>Smart Organization</h3>
+                    <p>Organize your content into custom sections, making it easy to find and manage different aspects of your curriculum.</p>
+                </div>
+    
+                <div class="feature-card">
+                    <h3>Calendar Integration</h3>
+                    <p>Never miss important dates with our integrated calendar view. Track deadlines, assignments, and events effortlessly.</p>
+                </div>
+    
+                <div class="feature-card">
+                    <h3>Progress Tracking</h3>
+                    <p>Mark items as urgent or completed, and keep everyone accountable with built-in progress tracking features.</p>
+                </div>
+    
+                <div class="feature-card">
+                    <h3>Communication Hub</h3>
+                    <p>Comment on agenda items, receive notifications, and ensure everyone stays in the loop with our comprehensive communication tools.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Benefits for Everyone</h1>
+            <div class="features-grid">
+                <div class="agenda-category">
+                    <label class="agenda-display-title">For Teachers</label>
+                    <div class="agenda-thumbnails">
+                        <div class="agenda-thumbnail">
+                            <label>Streamline course planning and management</label>
+                        </div>
+                        <div class="agenda-thumbnail">
+                            <label>Easily communicate deadlines and expectations</label>
+                        </div>
+                        <div class="agenda-thumbnail">
+                            <label>Track student engagement and progress</label>
+                        </div>
+                        <div class="agenda-thumbnail">
+                            <label>Maintain organized class records</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agenda-category">
+                    <label class="agenda-display-title">For Students</label>
+                    <div class="agenda-thumbnails">
+                        <div class="agenda-thumbnail">
+                            <label>Stay on top of assignments and deadlines</label>
+                        </div>
+                        <div class="agenda-thumbnail">
+                            <label>Access all course information in one place</label>
+                        </div>
+                        <div class="agenda-thumbnail">
+                            <label>Collaborate with classmates effectively</label>
+                        </div>
+                        <div class="agenda-thumbnail">
+                            <label>Never miss important updates</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-content about-bottom">
+            <h1 class="hero-title">Ready to Get Started?</h1>
+            <p class="hero-subtitle">Join Aghendi today and experience a more organized, collaborative approach to educational planning.</p>
+            <div class="hero-buttons">
+                <a href="{% url 'signup' %}" class="hero-button primary">Create Free Account</a>
+                <a href="{% url 'login' %}" class="hero-button secondary">Sign In</a>
+            </div>
+        </div>
+    </div>
+    <!-- --- -->
+{% endblock %}
