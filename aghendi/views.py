@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.db.models import Q
 
 from datetime import datetime, date
 from calendar import monthcalendar
@@ -33,45 +34,42 @@ def view_profile(request, user_id):
     try:
         profile_user = get_object_or_404(User, id=user_id)
         
-        # Get agendas shared between the current user and the profile user
-        shared_agendas = []
-        
-        # Add agendas where either user is the creator and the other is a member/editor
-        creator_agendas = Agenda.objects.filter(
-            creator=profile_user,
-            members=request.user
-        )
-        member_agendas = Agenda.objects.filter(
-            creator=request.user,
-            members=profile_user
-        )
-        
-        # Add agendas where both users are members/editors
-        common_agendas = Agenda.objects.filter(
-            members=profile_user
-        ).filter(
-            members=request.user
-        ).exclude(
-            creator__in=[profile_user, request.user]
-        )
-        
-        # Combine all shared agendas
-        shared_agendas = list(creator_agendas) + list(member_agendas) + list(common_agendas)
-        # Remove duplicates while preserving order
-        shared_agendas = list(dict.fromkeys(shared_agendas))
-        
+        # If viewing own profile, just get all agendas
+        if profile_user == request.user:
+            shared_agendas = list(Agenda.objects.filter(
+                Q(creator=request.user) | Q(members=request.user)
+            ).distinct())
+        else:
+            # Original logic for other users' profiles
+            creator_agendas = Agenda.objects.filter(
+                creator=profile_user,
+                members=request.user
+            )
+            member_agendas = Agenda.objects.filter(
+                creator=request.user,
+                members=profile_user
+            )
+            common_agendas = Agenda.objects.filter(
+                members=profile_user
+            ).filter(
+                members=request.user
+            ).exclude(
+                creator__in=[profile_user, request.user]
+            )
+            shared_agendas = list(dict.fromkeys(
+                list(creator_agendas) + list(member_agendas) + list(common_agendas)
+            ))
+            
         context = {
             'u': profile_user,
             'shared_agendas': shared_agendas,
         }
-        
         return render(request, 'aghendi/view_profile.html', context)
-        
     except User.DoesNotExist:
         messages.error(request, "User not found.")
         return redirect('index')
     except Exception as e:
-        messages.error(request, "An error occurred while loading the profile.")
+        messages.error(request, f"An error occurred while loading the profile: {str(e)}")
         return redirect('index')
 
 @login_required

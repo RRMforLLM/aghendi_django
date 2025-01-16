@@ -1775,7 +1775,7 @@ input[type="checkbox"] {
 }
 
 .collaboration-badge {
-    background: #4CAF50;
+    background: var(--success-color);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 20px;
@@ -1788,7 +1788,6 @@ input[type="checkbox"] {
     border-radius: 4px;
     font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-left: 0.5rem;
 }
 
 .profile-actions-section {
