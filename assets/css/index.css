@@ -1783,11 +1783,11 @@ input[type="checkbox"] {
 }
 
 .role-badge {
-    background: var(--text-primary);
+    background: var(--opposite-background-primary);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
     font-size: 0.8rem;
-    color: var(--text-secondary);
+    color: var(--opposite-text-primary);
 }
 
 .profile-actions-section {
