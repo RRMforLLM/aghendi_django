@@ -90,6 +90,19 @@
                                     </div>
                                 </div>
                             {% endif %}
+
+                            <div class="agenda-category">
+                                <label class="agenda-display-title">Users</label>
+                                <div class="agenda-thumbnails">
+                                    {% for u in users %}
+                                        <a>
+                                            <div class="agenda-thumbnail">
+                                                <label>{{ u.username }}</label>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

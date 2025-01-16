@@ -19,7 +19,8 @@ from .models import Agenda, AgendaSection, AgendaElement, ElementComment
 from .forms import AgendaKeyForm
 
 def index(request):
-    return render(request, 'aghendi/index.html')
+    users = User.objects.all()
+    return render(request, 'aghendi/index.html', {'users': users})
 
 def about(request):
     return render(request, 'aghendi/about.html')
