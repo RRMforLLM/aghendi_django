@@ -1715,3 +1715,87 @@ input[type="checkbox"] {
         padding: 1rem;
     }
 }
+
+.profile-section {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.profile-title {
+    font-size: 2rem;
+    color: var(--text-primary);
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--background-secondary);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stat-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+
+.stat-date {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.shared-agendas-section {
+    margin-top: 2rem;
+}
+
+.shared-agendas-section h2 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.collaboration-badge {
+    background: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.role-badge {
+    background: var(--text-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+
+.profile-actions-section {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.profile-actions-section .btn {
+    padding: 0.75rem 2rem;
+}
