@@ -95,7 +95,7 @@
                                 <label class="agenda-display-title">Users</label>
                                 <div class="agenda-thumbnails">
                                     {% for u in users %}
-                                        <a>
+                                        <a href="{% url 'view_profile' u.id %}">
                                             <div class="agenda-thumbnail">
                                                 <label>{{ u.username }}</label>
                                             </div>

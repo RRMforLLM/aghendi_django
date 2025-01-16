@@ -29,6 +29,52 @@ def privacy_policy(request):
     return render(request, 'aghendi/privacy_policy.html')
 
 @login_required
+def view_profile(request, user_id):
+    try:
+        profile_user = get_object_or_404(User, id=user_id)
+        
+        # Get agendas shared between the current user and the profile user
+        shared_agendas = []
+        
+        # Add agendas where either user is the creator and the other is a member/editor
+        creator_agendas = Agenda.objects.filter(
+            creator=profile_user,
+            members=request.user
+        )
+        member_agendas = Agenda.objects.filter(
+            creator=request.user,
+            members=profile_user
+        )
+        
+        # Add agendas where both users are members/editors
+        common_agendas = Agenda.objects.filter(
+            members=profile_user
+        ).filter(
+            members=request.user
+        ).exclude(
+            creator__in=[profile_user, request.user]
+        )
+        
+        # Combine all shared agendas
+        shared_agendas = list(creator_agendas) + list(member_agendas) + list(common_agendas)
+        # Remove duplicates while preserving order
+        shared_agendas = list(dict.fromkeys(shared_agendas))
+        
+        context = {
+            'u': profile_user,
+            'shared_agendas': shared_agendas,
+        }
+        
+        return render(request, 'aghendi/view_profile.html', context)
+        
+    except User.DoesNotExist:
+        messages.error(request, "User not found.")
+        return redirect('index')
+    except Exception as e:
+        messages.error(request, "An error occurred while loading the profile.")
+        return redirect('index')
+
+@login_required
 def settings_view(request):
     if request.method == "POST":
         action = request.POST.get('action')

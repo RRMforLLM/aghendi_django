@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ u.username }} - Aghendi
+{% endblock %}
+
+{% block content %}
+    <!-- MAIN -->
+    <div class="main">
+        <div class="profile-section">
+            <div class="profile-header">
+                <h1 class="profile-title">{{ u.username }}'s Profile</h1>
+                {% if user.is_authenticated and user != u %}
+                    <div class="profile-actions">
+                        {% if shared_agendas %}
+                            <span class="collaboration-badge">Collaborator</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-content">
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <h3>Created Agendas</h3>
+                        <p class="stat-number">{{ u.created_agendas.count }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Joined Agendas</h3>
+                        <p class="stat-number">{{ u.joined_agendas.count }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Member Since</h3>
+                        <p class="stat-date">{{ u.date_joined|date:"F j, Y" }}</p>
+                    </div>
+                </div>
+
+                {% if shared_agendas %}
+                    <div class="shared-agendas-section">
+                        <h2>Shared Agendas</h2>
+                        <div class="agenda-thumbnails">
+                            {% for agenda in shared_agendas %}
+                                <a href="{% url 'view_agenda' agenda.id %}">
+                                    <div class="agenda-thumbnail">
+                                        <label>{{ agenda.name }}</label>
+                                        <span class="role-badge">
+                                            {% if agenda.creator == u %}
+                                                Creator
+                                            {% elif u in agenda.editors.all %}
+                                                Editor
+                                            {% else %}
+                                                Member
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if user.is_authenticated and user == u %}
+                    <div class="profile-actions-section">
+                        <a href="{% url 'settings_view' %}" class="btn">Edit Profile</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .profile-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-title {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-date {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .shared-agendas-section {
+            margin-top: 2rem;
+        }
+
+        .shared-agendas-section h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .collaboration-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .role-badge {
+            background: #f0f0f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 0.5rem;
+        }
+
+        .profile-actions-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .profile-actions-section .btn {
+            padding: 0.75rem 2rem;
+        }
+    </style>
+    <!-- --- -->
+{% endblock %}
