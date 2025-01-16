@@ -34,13 +34,11 @@ def view_profile(request, user_id):
     try:
         profile_user = get_object_or_404(User, id=user_id)
         
-        # If viewing own profile, just get all agendas
         if profile_user == request.user:
             shared_agendas = list(Agenda.objects.filter(
                 Q(creator=request.user) | Q(members=request.user)
             ).distinct())
         else:
-            # Original logic for other users' profiles
             creator_agendas = Agenda.objects.filter(
                 creator=profile_user,
                 members=request.user
