@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Aghendi{% endblock %}
 
@@ -16,17 +17,6 @@
         <div class="auth-section">
             <label class="location">Login</label>
             <div class="form-section">
-                <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-login-btn">
-                    <button type="button" class="btn google-btn">
-                        <img src="{% static 'images/google-icon.svg' %}" alt="Google Icon">
-                        Login with Google
-                    </button>
-                </a>
-                
-                <div class="separator">
-                    <span>or</span>
-                </div>
-
                 <form method="POST" class="login-form">
                     {% csrf_token %}
                     <div class="form-group">
@@ -44,6 +34,17 @@
                         <a href="{% url 'password_reset_request' %}">Forgot your password?</a>
                     </div>
                 {% endif %}
+
+                <div class="separator">
+                    <span>or</span>
+                </div>
+
+                <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-login-btn">
+                    <button type="button" class="btn google-btn">
+                        <img src="{% static 'images/google-icon.svg' %}" alt="Google Icon">
+                        Login with Google
+                    </button>
+                </a>
             </div>
         </div>
     </div>
