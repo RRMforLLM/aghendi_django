@@ -1798,3 +1798,44 @@ input[type="checkbox"] {
 .profile-actions-section .btn {
     padding: 0.75rem 2rem;
 }
+
+/* Google Login Button */
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background-color: #fff;
+    color: #757575;
+    border: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.google-btn:hover {
+    background-color: #f8f8f8;
+}
+
+.google-btn img {
+    width: 18px;
+    height: 18px;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-secondary);
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.separator span {
+    padding: 0 10px;
+}
