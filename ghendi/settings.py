@@ -173,3 +173,12 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
+
+# Add these settings for social auth redirects
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_URL = 'logout'
+LOGOUT_REDIRECT_URL = 'login'
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'  # Where to redirect after OAuth login
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/login'  # Where to redirect if login fails
